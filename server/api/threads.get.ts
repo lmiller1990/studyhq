@@ -8,7 +8,7 @@ export default defineEventHandler(async (event) => {
     threadsForUser.map(async (x) => {
       const t = await openai.beta.threads.retrieve(x.openai_id);
       return { ...t, openai_id: t.id, id: (x.id as number).toString() };
-    })
+    }),
   );
   return all;
   // await db("threads").insert({ openai_id: emptyThread.id, user_id: 1 });

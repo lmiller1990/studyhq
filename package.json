@@ -7,7 +7,8 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare"
+    "postinstall": "nuxt prepare",
+    "lint": "prettier --write ."
   },
   "dependencies": {
     "@nuxt/ui": "^2.16.0",
@@ -16,6 +17,7 @@
     "nuxt": "^3.11.2",
     "openai": "^4.47.2",
     "pinia": "^2.1.7",
+    "prettier": "^3.2.5",
     "sqlite3": "^5.1.7",
     "vue": "^3.4.27",
     "vue-router": "^4.3.2"

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { SerializeObject } from "nitropack";
 import type { Message } from "openai/resources/beta/threads/messages";
+import type { Payload } from "~/composables/useWebSocket";
 
 const route = useRoute();
 
@@ -32,39 +33,23 @@ async function handleRun() {
   ws.send(JSON.stringify({ threadId: id }));
 }
 
-const conversation = computed(() => {
-  return (data.value ?? []).slice().reverse();
-});
-
 let ws: WebSocket;
 
 const replies = ref("");
 
-async function connectWebSocket() {
-  const isSecure = location.protocol === "https:";
-  const url = (isSecure ? "wss://" : "ws://") + location.host + "/_ws";
-  if (ws) {
-    console.log("Closing previous connection before reconnecting...");
-    ws.close();
+function onMessage(payload: Payload) {
+  if (payload.type === "text-chunk") {
+    replies.value += payload.text;
   }
-
-  console.log("Connecting to", url, "...");
-  ws = new WebSocket(url);
-
-  ws.addEventListener("open", () => {
-    console.log("WebSocket opened");
-  });
-
-  ws.addEventListener("message", (event) => {
-    const data = JSON.parse(event.data);
-    if (data.type === "text-chunk") {
-      console.log(data.text);
-      replies.value += data.text;
-    }
-  });
 }
 
-connectWebSocket();
+onMounted(() => {
+  ws = useWebSocket({ onMessage });
+});
+
+onUnmounted(() => {
+  ws!.close();
+});
 </script>
 
 <template>
@@ -79,7 +64,7 @@ connectWebSocket();
           v-if="message.content[0]?.type === 'text'"
           class="p-1 rounded px-2"
           :class="{
-            'bg-gray-200': message.role === 'user',
+            'bg-gray-200 dark:bg-gray-700': message.role === 'user',
             'max-w-[50vw]': message.role === 'user',
           }"
         >
@@ -97,7 +82,10 @@ connectWebSocket();
   <UDivider class="p-4" />
 
   <form @submit.prevent="handleSubmitMessage">
-    <UTextarea v-model="msg" placeholder="Chat..." />
+    <UTextarea
+      v-model="msg"
+      placeholder="Chat..."
+    />
     <UButton type="submit">Start!</UButton>
   </form>
 

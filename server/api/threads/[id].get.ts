@@ -14,8 +14,8 @@ export default defineEventHandler(async (event) => {
     {
       limit: 5,
       order: "desc",
-    }
+    },
   );
 
-  return threadMessages.data;
+  return threadMessages.data.reverse();
 });

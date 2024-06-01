@@ -44,7 +44,10 @@ connect();
   <div class="flex flex-col items-center justify-center h-full">
     <h2>Welcome.</h2>
     <div>
-      <UButton color="indigo" :loading="loading" @click="run"
+      <UButton
+        color="indigo"
+        :loading="loading"
+        @click="run"
         >Start Studying</UButton
       >
     </div>

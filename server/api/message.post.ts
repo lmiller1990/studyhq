@@ -16,6 +16,5 @@ export default defineEventHandler(async (event) => {
     content: body.message,
   });
 
-  console.log(message);
   return message;
 });
