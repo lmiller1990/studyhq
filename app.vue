@@ -14,17 +14,32 @@ const links = computed(() => {
     };
   });
 });
+
+async function handleNewThread() {
+  const t = await $fetch("/api/threads", { method: "POST" });
+  await navigateTo(`/threads/${t.id}`);
+}
 </script>
 
 <template>
-  <div class="flex h-full">
-    <div class="w-72">
-      <UVerticalNavigation :links="links" />
+  <UContainer class="pt-4">
+    <div class="flex justify-end w-full">
+      <button @click="handleNewThread">
+        <UIcon
+          name="i-heroicons-pencil-square"
+          class="text-xl"
+        />
+      </button>
     </div>
-    <div class="w-full h-full">
-      <NuxtPage />
+    <div class="flex h-full">
+      <div class="w-72">
+        <UVerticalNavigation :links="links" />
+      </div>
+      <div class="w-full h-full">
+        <NuxtPage />
+      </div>
     </div>
-  </div>
+  </UContainer>
 </template>
 
 <style>

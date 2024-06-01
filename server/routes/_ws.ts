@@ -3,10 +3,16 @@ import { openai } from "~/server/open_ai";
 
 const assitantId = "asst_sxL8Gxy8meOwaf0vySOnegmu";
 
+interface StreamCallbackOptions {
+  send: (chunk: string) => void;
+  onComplete: () => void;
+  onStart: () => void;
+}
+
 async function streamRun(
   threadId: string,
   assistantId: string,
-  send: (chunk: string) => void,
+  { send, onComplete, onStart }: StreamCallbackOptions,
 ) {
   const stream = openai.beta.threads.runs.stream(threadId, {
     assistant_id: assistantId,
@@ -18,6 +24,11 @@ async function streamRun(
         send(chunk.data.delta.content[0].text?.value!);
         // process.stdout.write(chunk.data.delta.content[0].text?.value);
       }
+    } else if (chunk.event === "thread.run.completed") {
+      onComplete();
+    } else if (chunk.event === "thread.run.created") {
+      onStart();
+      //
     } else {
       console.log(`Used event: ${chunk.event}`);
     }
@@ -37,14 +48,32 @@ export default defineWebSocketHandler({
       throw new Error(`No thread with id ${parsed.threadId} found!`);
     }
     // const openaiThread = await openai.beta.threads.retrieve(dbthread.openai_id);
-    streamRun(dbthread.openai_id, assitantId, (textChunk) =>
-      peer.send(
-        JSON.stringify({
-          type: "text-chunk",
-          text: textChunk,
-        }),
-      ),
-    );
+    streamRun(dbthread.openai_id, assitantId, {
+      send: (textChunk) => {
+        peer.send(
+          JSON.stringify({
+            type: "thread.message.delta",
+            text: textChunk,
+          }),
+        );
+      },
+
+      onComplete: () => {
+        peer.send(
+          JSON.stringify({
+            type: "thread.run.completed",
+          }),
+        );
+      },
+
+      onStart: () => {
+        peer.send(
+          JSON.stringify({
+            type: "thread.run.created",
+          }),
+        );
+      },
+    });
   },
 
   close(peer, event) {

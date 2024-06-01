@@ -10,7 +10,6 @@ export default defineEventHandler(async (event) => {
       return { ...t, openai_id: t.id, id: (x.id as number).toString() };
     }),
   );
+  all.sort((x, y) => (x.created_at - y.created_at ? -1 : 1));
   return all;
-  // await db("threads").insert({ openai_id: emptyThread.id, user_id: 1 });
-  // return emptyThread;
 });

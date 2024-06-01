@@ -1,9 +1,20 @@
 export interface TextChunkPayload {
-  type: "text-chunk";
+  type: "thread.message.delta";
   text: string;
 }
 
-export type Payload = TextChunkPayload;
+export interface ThreadRunCreatedPayload {
+  type: "thread.run.created";
+}
+
+export interface ThreadStreamCompleted {
+  type: "thread.run.completed";
+}
+
+export type Payload =
+  | TextChunkPayload
+  | ThreadRunCreatedPayload
+  | ThreadStreamCompleted;
 
 /**
  * @description Create a web socket with listener
