@@ -24,6 +24,9 @@ CREATE TABLE exams (
     openai_id TEXT NOT NULL UNIQUE,
     questions TEXT NOT NULL,
     user_id INTEGER NOT NULL,
+    completed INTEGER DEFAULT 0,
+    feedback TEXT,
+    created TEXT DEFAULT (datetime('now')),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 

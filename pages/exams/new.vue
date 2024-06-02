@@ -62,8 +62,7 @@ async function handleCreateExam() {
   const result = await $fetch("/api/exams", {
     method: "POST",
     body: {
-      topic: "biology",
-      additionalContent: "proteins and nucleic acids",
+      additionalContent: msg.value,
     },
   });
   // exam.value.push(...result.map((question) => ({ question, answer: "" })));
@@ -75,9 +74,9 @@ async function handleCreateExam() {
 <template>
   <UContainer>
     <p class="leading-relaxed mb-2">
-      Welcome to practice exams. Enter the topic and content below, and get a
-      personalized exam. Once you complete the exam, you'll receive a final
-      grade and recommendations to improve.
+      Welcome to practice exams. Enter the content below, and get a personalized
+      exam. Once you complete the exam, you'll receive a final grade and
+      recommendations to improve.
     </p>
     <!--  -->
     <form

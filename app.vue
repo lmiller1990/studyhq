@@ -15,6 +15,18 @@ const links = computed(() => {
   });
 });
 
+const { data: exams } = await useFetch("/api/exams");
+
+const examLinks = computed(() =>
+  (exams.value ?? []).map((exam) => {
+    return {
+      label: `${new Date(exam.created).toTimeString()} - id ${exam.id}`,
+      icon: "i-heroicons-document-text",
+      to: `/exams/${exam.id}`,
+    };
+  }),
+);
+
 async function handleNewThread() {
   const t = await $fetch("/api/threads", { method: "POST" });
   await navigateTo(`/threads/${t.id}`);
@@ -58,7 +70,7 @@ async function handleNewExam() {
             >New Exam</UButton
           >
         </div>
-        <UVerticalNavigation :links="[]" />
+        <UVerticalNavigation :links="examLinks" />
       </div>
 
       <div class="w-full h-full">
