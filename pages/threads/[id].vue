@@ -108,7 +108,7 @@ onUnmounted(() => {
     >
       <div
         v-if="message.content[0]?.type === 'text'"
-        class="p-1 rounded px-2"
+        class="p-1 rounded px-2 whitespace-pre-wrap"
         :class="{
           'bg-gray-200 dark:bg-gray-700': message.role === 'user',
           'max-w-[50vw]': message.role === 'user',

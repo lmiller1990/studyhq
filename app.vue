@@ -19,6 +19,10 @@ async function handleNewThread() {
   const t = await $fetch("/api/threads", { method: "POST" });
   await navigateTo(`/threads/${t.id}`);
 }
+
+async function handleNewExam() {
+  await navigateTo(`/exams/new`);
+}
 </script>
 
 <template>
@@ -31,10 +35,32 @@ async function handleNewThread() {
         />
       </button>
     </div>
+
     <div class="flex h-full">
       <div class="w-72">
+        <div class="flex justify-between items-center">
+          <h2 class="font-bold m-2">Chats</h2>
+          <UButton
+            size="xs"
+            @click="handleNewThread"
+            >New Chat</UButton
+          >
+        </div>
         <UVerticalNavigation :links="links" />
+
+        <UDivider class="my-4" />
+
+        <div class="flex justify-between items-center">
+          <h2 class="font-bold m-2">Exams</h2>
+          <UButton
+            size="xs"
+            @click="handleNewExam"
+            >New Exam</UButton
+          >
+        </div>
+        <UVerticalNavigation :links="[]" />
       </div>
+
       <div class="w-full h-full">
         <NuxtPage />
       </div>

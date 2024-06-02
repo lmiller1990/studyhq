@@ -18,4 +18,13 @@ CREATE TABLE threads (
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
+-- Create the 'threads' table
+CREATE TABLE exams (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    openai_id TEXT NOT NULL UNIQUE,
+    questions TEXT NOT NULL,
+    user_id INTEGER NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
 INSERT INTO users (email) values ("lachlan@lachlan-miller.me")
