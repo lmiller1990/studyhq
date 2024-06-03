@@ -1,6 +1,7 @@
 import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
 import { questionSeparator } from "~/server/shared";
+import { getSummary } from "~/services/summary";
 
 export const professorAssistantId = "asst_4wo91B5kt0nkr2mQG3XZoyZM";
 
@@ -20,10 +21,8 @@ Here's the topics and content you should consider when making the questions:
 ${additionalContent}
 `;
 
-export default defineEventHandler(async (event) => {
-  const body = await readBody<{ additionalContent: string }>(event);
-
-  const content = examPrompt(body.additionalContent, 1);
+async function createExam(additionalContent: string) {
+  const content = examPrompt(additionalContent, 5);
 
   console.log("Creating thread for exam...");
   const emptyThread = await openai.beta.threads.create({
@@ -41,8 +40,6 @@ export default defineEventHandler(async (event) => {
     assistant_id: professorAssistantId,
   });
 
-  console.log(exam);
-
   const messages = await openai.beta.threads.messages.list(exam.thread_id, {
     order: "desc",
   });
@@ -59,13 +56,25 @@ export default defineEventHandler(async (event) => {
       string[]
     >((acc, curr) => (curr.length > 0 ? acc.concat(curr) : acc), []);
 
+  return { exam, questions };
+}
+
+export default defineEventHandler(async (event) => {
+  const body = await readBody<{ additionalContent: string }>(event);
+
+  const [{ exam, questions }, examSummary] = await Promise.all([
+    createExam(body.additionalContent),
+    getSummary(body.additionalContent),
+  ]);
+
   const dbExam = await db("exams")
     .insert({
       openai_id: exam.thread_id,
       questions: questions.join(questionSeparator),
+      summary: examSummary,
       user_id: 1,
     })
     .returning("id");
-  console.log(`Created exam with id ${dbExam[0].id}. Content is ${content}`);
+
   return { id: dbExam[0].id as string };
 });

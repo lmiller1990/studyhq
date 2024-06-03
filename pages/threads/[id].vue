@@ -55,7 +55,10 @@ async function handleSubmitMessage() {
 
   // 3. Run1
   window.ws.send(
-    JSON.stringify({ threadId: id, firstMessage: firstMessage.value ?? null }),
+    JSON.stringify({
+      threadId: id,
+      firstMessage: firstMessage.value ?? null,
+    }),
   );
 }
 

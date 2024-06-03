@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { emitter } from "~/src/emitter";
+
 //
 const submitting = ref(false);
 
@@ -12,8 +14,8 @@ async function handleCreateExam() {
       additionalContent: msg.value,
     },
   });
-  // exam.value.push(...result.map((question) => ({ question, answer: "" })));
   submitting.value = false;
+  emitter.emit("refresh.exams");
   await navigateTo(`/exams/${result.id}`);
 }
 </script>

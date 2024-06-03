@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { createWebSocket } from "~/composables/createWebSocket";
+import { emitter } from "~/src/emitter";
 
 const { data: threads, refresh } = useFetch("/api/threads");
 
@@ -10,6 +11,8 @@ declare global {
 }
 
 onMounted(() => {
+  emitter.on("refresh.exams", refreshExams);
+
   const ws = createWebSocket({
     name: "top-level",
   });
@@ -27,10 +30,6 @@ onMounted(() => {
   });
 });
 
-onUnmounted(() => {
-  console.log("Unmount");
-});
-
 const links = computed(() => {
   return (threads.value ?? [])?.map((thread) => {
     return {
@@ -45,12 +44,12 @@ const links = computed(() => {
   });
 });
 
-const { data: exams } = await useFetch("/api/exams");
+const { data: exams, refresh: refreshExams } = await useFetch("/api/exams");
 
 const examLinks = computed(() =>
   (exams.value ?? []).map((exam) => {
     return {
-      label: `${new Date(exam.created).toTimeString()} - id ${exam.id}`,
+      label: exam.summary,
       icon: "i-heroicons-document-text",
       to: `/exams/${exam.id}`,
     };
@@ -107,7 +106,7 @@ async function handleNewExam() {
         <UVerticalNavigation :links="examLinks" />
       </div>
 
-      <div class="w-full h-full">
+      <div class="w-full h-full mb-4">
         <NuxtPage />
       </div>
     </div>

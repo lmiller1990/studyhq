@@ -74,9 +74,10 @@ export default defineEventHandler(async (event) => {
   await db("exams").update({
     completed: 1,
     feedback: message.content[0].text.value,
-    answers: questions.map(({ answer }) => answer).join(answerSeparator),
+    answers: questions
+      .map(({ answer }) => answer ?? "No answer provided.")
+      .join(answerSeparator),
   });
 
-  console.log(message.content[0].text.value);
   return message.content[0].text.value;
 });

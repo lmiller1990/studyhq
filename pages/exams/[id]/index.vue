@@ -21,7 +21,10 @@ async function submitExam() {
     method: "POST",
     body: {
       id,
-      questions: questionsAndAnswers.value,
+      questions: questionsAndAnswers.value.map(({ question, answer }) => ({
+        question,
+        answer: answer ?? "No answer provided.",
+      })),
     },
   });
   await navigateTo(`/exams/${id}/results`);

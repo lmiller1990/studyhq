@@ -26,6 +26,7 @@ CREATE TABLE exams (
     questions TEXT NOT NULL,
     user_id INTEGER NOT NULL,
     completed INTEGER DEFAULT 0,
+    summary TEXT,
     answers TEXT,
     feedback TEXT,
     created TEXT DEFAULT (datetime('now')),
