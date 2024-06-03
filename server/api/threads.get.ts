@@ -1,9 +1,20 @@
 import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
+import { maybeGetUser } from "~/server/token";
+import { getToken } from "#auth";
 
 export default defineEventHandler(async (event) => {
+  const token = await getToken({ event });
+  console.log("token is..", token);
+
+  const user = await maybeGetUser(event);
+
+  if (!user) {
+    return [];
+  }
+
   const threadsForUser = await db("threads")
-    .where({ user_id: 1 })
+    .where({ user_id: user.id })
     .whereNotNull("summary");
 
   const all = await Promise.all(

@@ -1,55 +1,32 @@
-<script setup lang="ts">
-const threadsStore = useThreadsStore();
+<script lang="ts" setup>
+const { signIn, data } = useAuth();
 
-async function handleStartStudy() {
-  const t = await $fetch("/api/threads", { method: "POST" });
-  await threadsStore.fetch();
-  await navigateTo(`/threads/${t.id}`);
+function handleGoogleAuth() {
+  signIn("google");
 }
-
-const { run, loading } = useLoading(handleStartStudy);
-
-const log = console.log;
-
-let ws: WebSocket;
-
-async function connect() {
-  const isSecure = location.protocol === "https:";
-  const url = (isSecure ? "wss://" : "ws://") + location.host + "/_ws";
-  if (ws) {
-    log("ws", "Closing previous connection before reconnecting...");
-    ws.close();
-  }
-
-  log("ws", "Connecting to", url, "...");
-  ws = new WebSocket(url);
-
-  ws.addEventListener("open", () => {
-    ws.send("ping");
-  });
-
-  ws.addEventListener("message", (event) => {
-    const { user = "system", message = "" } = event.data.startsWith("{")
-      ? JSON.parse(event.data)
-      : { message: event.data };
-
-    log(user, typeof message === "string" ? message : JSON.stringify(message));
-  });
-}
-
-connect();
 </script>
 
 <template>
-  <div class="flex flex-col items-center justify-center h-full">
-    <h2>Welcome.</h2>
-    <div>
-      <UButton
-        color="indigo"
-        :loading="loading"
-        @click="run"
-        >Start Studying</UButton
-      >
+  <UContainer class="grid grid-rows-3 gap-y-6 h-full items-center mt-24">
+    <h2 class="text-xl flex justify-center whitespace-pre">
+      Welcome to <span class="font-mono">StudyMATE.ai</span>.
+    </h2>
+    <div
+      v-if="data?.user"
+      class="flex justify-center"
+    >
+      Welcome back, {{ data.user.name }}.
     </div>
-  </div>
+
+    <template v-else>
+      <p class="flex justify-center">
+        Sign in below to start studying and taking practice exams.
+      </p>
+      <p class="flex justify-center">
+        <UButton @click="handleGoogleAuth"
+          ><GoogleIcon class="h-4 w-4" /> Continue with Google</UButton
+        >
+      </p>
+    </template>
+  </UContainer>
 </template>

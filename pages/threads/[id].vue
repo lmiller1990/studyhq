@@ -13,7 +13,11 @@ const id = route.params.id;
 const { data, refresh } = await useFetch(`/api/threads/${route.params.id}`);
 
 const msg = ref("");
-const textAreaRef = ref<HTMLTextAreaElement>();
+const textAreaRef = ref<{ textarea: HTMLTextAreaElement }>();
+
+onMounted(() => {
+  textAreaRef.value?.textarea.focus();
+});
 
 const localMessages = ref<SerializeObject<Message>[]>([]);
 
@@ -37,9 +41,12 @@ const firstMessage = computed(() => {
 });
 
 async function handleSubmitMessage() {
+  if (submitting.value) {
+    // double submit
+    return;
+  }
   submitting.value = true;
   const cachedMsg = msg.value;
-  msg.value = "";
 
   // 1. Write message to OpenAI
   const message = await $fetch("/api/message", {
@@ -60,6 +67,8 @@ async function handleSubmitMessage() {
       firstMessage: firstMessage.value ?? null,
     }),
   );
+
+  msg.value = "";
 }
 
 function createTempMsg(msgText: string): any {
@@ -115,6 +124,12 @@ onMounted(() => {
 onBeforeUnmount(() => {
   removeWebSocketCallback(callback);
 });
+
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === "Enter" && !event.shiftKey) {
+    nextTick(handleSubmitMessage);
+  }
+}
 </script>
 
 <template>
@@ -147,6 +162,7 @@ onBeforeUnmount(() => {
         autoresize
         placeholder="Chat..."
         :maxrows="20"
+        @keydown="handleKeydown"
         class="w-full mb-2"
         ref="textAreaRef"
       />

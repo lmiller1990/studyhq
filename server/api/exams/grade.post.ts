@@ -43,8 +43,6 @@ export default defineEventHandler(async (event) => {
     questions: Array<{ question: string; answer: string }>;
   }>(event);
 
-  console.log({ id, questions });
-
   const content = questions
     .map(({ question, answer }) => `${question}\n\nAnswer: ${answer}`)
     .join("\n\n");

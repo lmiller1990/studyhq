@@ -34,3 +34,10 @@ CREATE TABLE exams (
 );
 
 INSERT INTO users (email) values ("lachlan@lachlan-miller.me")
+
+CREATE TABLE sessions (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    created TEXT DEFAULT (datetime('now')),
+    FOREIGN KEY (email) REFERENCES users(email)
+)

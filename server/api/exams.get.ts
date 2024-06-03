@@ -1,9 +1,15 @@
 import { db } from "~/server/db";
+import { maybeGetUser } from "~/server/token";
 
 export default defineEventHandler(async (event) => {
   // HACK: https://github.com/nuxt/nuxt/issues/22488
+  const user = await maybeGetUser(event);
+  if (!user) {
+    return [];
+  }
+
   const exams = await db("exams")
-    .where({ user_id: 1 })
+    .where({ user_id: user.id })
     .orderBy("created", "desc")
     .select("*");
 

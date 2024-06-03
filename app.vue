@@ -59,25 +59,20 @@ const examLinks = computed(() =>
 const { run: handleNewThread, loading: creatingNewThread } = useLoading(
   async () => {
     const t = await $fetch("/api/threads", { method: "POST" });
-    await navigateTo(`/threads/${t.id}`);
+    await navigateTo(`/threads/${t!.id}`);
   },
 );
 
 async function handleNewExam() {
   await navigateTo(`/exams/new`);
 }
+
+const { signIn, getSession, data } = useAuth();
 </script>
 
 <template>
   <UContainer class="pt-4">
-    <div class="flex justify-end w-full">
-      <button @click="handleNewThread">
-        <UIcon
-          name="i-heroicons-pencil-square"
-          class="text-xl"
-        />
-      </button>
-    </div>
+    <div class="flex justify-end w-full font-mono mb-4">StudyMATE.ai</div>
 
     <div class="flex h-full">
       <div class="w-72">
@@ -88,7 +83,8 @@ async function handleNewExam() {
             :disabled="creatingNewThread"
             :loading="creatingNewThread"
             @click="handleNewThread"
-            >New Chat</UButton
+          >
+            New Chat</UButton
           >
         </div>
         <UVerticalNavigation :links="links" />

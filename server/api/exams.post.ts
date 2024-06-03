@@ -1,6 +1,7 @@
 import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
 import { questionSeparator } from "~/server/shared";
+import { maybeGetUser } from "~/server/token";
 import { getSummary } from "~/services/summary";
 
 export const professorAssistantId = "asst_4wo91B5kt0nkr2mQG3XZoyZM";
@@ -61,6 +62,10 @@ async function createExam(additionalContent: string) {
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<{ additionalContent: string }>(event);
+  const user = await maybeGetUser(event);
+  if (!user) {
+    return;
+  }
 
   const [{ exam, questions }, examSummary] = await Promise.all([
     createExam(body.additionalContent),
@@ -72,7 +77,7 @@ export default defineEventHandler(async (event) => {
       openai_id: exam.thread_id,
       questions: questions.join(questionSeparator),
       summary: examSummary,
-      user_id: 1,
+      user_id: user.id,
     })
     .returning("id");
 
