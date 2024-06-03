@@ -1,14 +1,44 @@
 <script setup lang="ts">
-const threadsStore = useThreadsStore();
+import { createWebSocket } from "~/composables/createWebSocket";
 
-await callOnce(threadsStore.fetch);
+const { data: threads, refresh } = useFetch("/api/threads");
+
+declare global {
+  interface Window {
+    ws: WebSocket;
+  }
+}
+
+onMounted(() => {
+  const ws = createWebSocket({
+    name: "top-level",
+  });
+
+  if (!ws) {
+    return;
+  }
+
+  window.ws = ws;
+
+  registerWebSocketCallback((payload: Payload) => {
+    if (payload.type === "summary.completed") {
+      refresh();
+    }
+  });
+});
+
+onUnmounted(() => {
+  console.log("Unmount");
+});
 
 const links = computed(() => {
-  return threadsStore.threads.map((thread) => {
+  return (threads.value ?? [])?.map((thread) => {
     return {
-      label: `${new Date(thread.created_at * 1000).toTimeString()} - id ${
-        thread.id
-      }`,
+      label:
+        thread.summary ??
+        `${new Date(thread.created_at * 1000).toTimeString()} - id ${
+          thread.id
+        }`,
       icon: "i-heroicons-document-solid",
       to: `/threads/${thread.id}`,
     };
@@ -27,10 +57,12 @@ const examLinks = computed(() =>
   }),
 );
 
-async function handleNewThread() {
-  const t = await $fetch("/api/threads", { method: "POST" });
-  await navigateTo(`/threads/${t.id}`);
-}
+const { run: handleNewThread, loading: creatingNewThread } = useLoading(
+  async () => {
+    const t = await $fetch("/api/threads", { method: "POST" });
+    await navigateTo(`/threads/${t.id}`);
+  },
+);
 
 async function handleNewExam() {
   await navigateTo(`/exams/new`);
@@ -54,6 +86,8 @@ async function handleNewExam() {
           <h2 class="font-bold m-2">Chats</h2>
           <UButton
             size="xs"
+            :disabled="creatingNewThread"
+            :loading="creatingNewThread"
             @click="handleNewThread"
             >New Chat</UButton
           >

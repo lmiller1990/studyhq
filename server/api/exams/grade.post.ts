@@ -2,6 +2,7 @@ import { openai } from "~/server/open_ai";
 
 import { professorAssistantId } from "../exams.post";
 import { db } from "~/server/db";
+import { answerSeparator } from "~/server/shared";
 
 const assistantPrompt = (qa: string) => `
 You are a professor grading practice exams. The format for the exam is:
@@ -31,7 +32,7 @@ When responding, format should be as follows:
 
 Do not include anything other than the above template in your response. Be concise.
 
-Here are the questions any answers:
+Here are the questions and answers:
 
 ${qa}
 `;
@@ -73,6 +74,7 @@ export default defineEventHandler(async (event) => {
   await db("exams").update({
     completed: 1,
     feedback: message.content[0].text.value,
+    answers: questions.map(({ answer }) => answer).join(answerSeparator),
   });
 
   console.log(message.content[0].text.value);

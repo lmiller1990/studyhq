@@ -1,6 +1,5 @@
 import { db } from "~/server/db";
-
-export const questionSeparator = "__QUESTION__";
+import { questionSeparator } from "~/server/shared";
 
 interface Exam {
   openai_id: string;
@@ -16,9 +15,11 @@ export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id")?.split(":")[1];
   const exam = await db("exams").where({ id }).first();
   const questions = exam.questions.split(questionSeparator) as string[];
+  const answers = (exam.answers ?? "").split(questionSeparator) as string[];
   return {
     questions,
     completed: Boolean(exam.completed),
+    answers,
     feedback: exam.feedback as string,
   };
 });

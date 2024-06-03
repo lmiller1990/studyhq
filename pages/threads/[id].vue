@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import type { SerializeObject } from "nitropack";
 import type { Message } from "openai/resources/beta/threads/messages";
-import type { Payload } from "~/composables/useWebSocket";
+import {
+  removeWebSocketCallback,
+  type Payload,
+} from "~/composables/createWebSocket";
 
 const route = useRoute();
 
@@ -15,10 +18,23 @@ const textAreaRef = ref<HTMLTextAreaElement>();
 const localMessages = ref<SerializeObject<Message>[]>([]);
 
 const allMessages = computed(() => {
-  return (data.value ?? []).concat(localMessages.value);
+  return [
+    createTempMsg(
+      "Hi 👋 I am here to help you learn about whatever you want. Over to you!",
+    ),
+  ]
+    .concat(data.value ?? [])
+    .concat(localMessages.value);
 });
 
 const submitting = ref(false);
+
+const firstMessage = computed(() => {
+  const f = allMessages.value[0];
+  if (f && f.content[0].type === "text") {
+    return f.content[0].text.value;
+  }
+});
 
 async function handleSubmitMessage() {
   submitting.value = true;
@@ -38,12 +54,10 @@ async function handleSubmitMessage() {
   localMessages.value.push(message);
 
   // 3. Run1
-  ws.send(JSON.stringify({ threadId: id }));
+  window.ws.send(
+    JSON.stringify({ threadId: id, firstMessage: firstMessage.value ?? null }),
+  );
 }
-
-let ws: WebSocket;
-
-const replies = ref("");
 
 function createTempMsg(msgText: string): any {
   const ts = Date.now() / 1000;
@@ -73,7 +87,7 @@ function createTempMsg(msgText: string): any {
   };
 }
 
-function onMessage(payload: Payload) {
+function callback(payload: Payload) {
   if (payload.type === "thread.run.created") {
     // Create a temporary message for the incoming data and push it into the local messages.
     // We will update it with the stream data as it comes in.
@@ -87,56 +101,57 @@ function onMessage(payload: Payload) {
     }
   } else if (payload.type === "thread.run.completed") {
     submitting.value = false;
+    // get a summary (maybe)
   }
 }
 
 onMounted(() => {
-  ws = useWebSocket({ onMessage });
+  registerWebSocketCallback(callback);
 });
 
-onUnmounted(() => {
-  ws!.close();
+onBeforeUnmount(() => {
+  removeWebSocketCallback(callback);
 });
 </script>
 
 <template>
-  <ul class="leading-relaxed">
-    <li
-      v-for="message of allMessages"
-      class="flex w-full my-4"
-      :class="{ 'justify-end': message.role === 'user' }"
-    >
-      <div
-        v-if="message.content[0]?.type === 'text'"
-        class="p-1 rounded px-2 whitespace-pre-wrap"
-        :class="{
-          'bg-gray-200 dark:bg-gray-700': message.role === 'user',
-          'max-w-[50vw]': message.role === 'user',
-        }"
+  <UContainer>
+    <ul class="leading-relaxed">
+      <li
+        v-for="message of allMessages"
+        class="flex w-full my-4"
+        :class="{ 'justify-end': message.role === 'user' }"
       >
-        {{ message.content[0].text.value }}
-      </div>
-    </li>
-  </ul>
+        <div
+          v-if="message.content[0]?.type === 'text'"
+          class="p-1 rounded px-2 whitespace-pre-wrap"
+          :class="{
+            'bg-gray-200 dark:bg-gray-700': message.role === 'user',
+            'max-w-[50vw]': message.role === 'user',
+          }"
+        >
+          {{ message.content[0].text.value }}
+        </div>
+      </li>
+    </ul>
 
-  <UDivider class="py-4" />
-
-  <form
-    @submit.prevent="handleSubmitMessage"
-    class="flex flex-col items-end"
-  >
-    <UTextarea
-      v-model="msg"
-      autoresize
-      placeholder="Chat..."
-      :maxrows="20"
-      class="w-full mb-2"
-      ref="textAreaRef"
-    />
-    <UButton
-      type="submit"
-      :disabled="submitting"
-      >Send</UButton
+    <form
+      @submit.prevent="handleSubmitMessage"
+      class="flex flex-col items-end"
     >
-  </form>
+      <UTextarea
+        v-model="msg"
+        autoresize
+        placeholder="Chat..."
+        :maxrows="20"
+        class="w-full mb-2"
+        ref="textAreaRef"
+      />
+      <UButton
+        type="submit"
+        :disabled="submitting"
+        >Send</UButton
+      >
+    </form>
+  </UContainer>
 </template>

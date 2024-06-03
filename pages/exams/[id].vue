@@ -12,7 +12,7 @@ const questionsAndAnswers = computed(() =>
 
 const submitted = ref(false);
 
-const examResult = ref("");
+const examResult = ref(exam.value?.feedback);
 
 async function submitExam() {
   submitted.value = true;
@@ -48,7 +48,10 @@ const { run: handleSubmitExam, loading } = useLoading(submitExam);
           />
         </label>
       </div>
-      <div class="flex flex-col items-end">
+      <div
+        v-if="!exam?.completed || !examResult"
+        class="flex flex-col items-end"
+      >
         <UButton
           type="submit"
           :disabled="loading || submitted"
@@ -57,9 +60,12 @@ const { run: handleSubmitExam, loading } = useLoading(submitExam);
         >
       </div>
     </form>
-
-    <div class="whitespace-pre-wrap">
-      {{ examResult }}
+    <div
+      class="whitespace-pre-wrap"
+      v-if="examResult || exam?.feedback"
+    >
+      <UDivider class="my-2" />
+      {{ examResult || exam?.feedback }}
     </div>
   </UContainer>
 </template>

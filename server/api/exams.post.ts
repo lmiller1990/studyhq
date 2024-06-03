@@ -1,7 +1,6 @@
 import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
-
-export const questionSeparator = "__QUESTION__";
+import { questionSeparator } from "~/server/shared";
 
 export const professorAssistantId = "asst_4wo91B5kt0nkr2mQG3XZoyZM";
 
