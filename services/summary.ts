@@ -31,9 +31,16 @@ export async function getSummary(msg: string) {
   // last one is summary
   const message = messages.data[0];
 
+  console.log(
+    "Conversation",
+    // @ts-ignoree
+    messages.data.map((x) => x.content[0].text.value).join("\n"),
+  );
+
   if (!message || message.content[0].type !== "text") {
     throw Error("WTF");
   }
+  console.log(`Message for summary: ${message.content[0].text.value}`);
 
   console.log("Summary is ", message.content[0].text.value);
 

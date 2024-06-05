@@ -51,6 +51,8 @@ async function createExam(additionalContent: string) {
     throw Error("No exam - something is wrong");
   }
 
+  console.log("Content for exam is ", examMessage.content[0].text.value);
+
   const questions = examMessage.content[0].text.value
     .split("\n")
     .reduce<

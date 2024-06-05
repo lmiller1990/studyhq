@@ -43,6 +43,8 @@ export default defineEventHandler(async (event) => {
     questions: Array<{ question: string; answer: string }>;
   }>(event);
 
+  console.log(`Grading exam id ${id}`);
+
   const content = questions
     .map(({ question, answer }) => `${question}\n\nAnswer: ${answer}`)
     .join("\n\n");
@@ -69,13 +71,15 @@ export default defineEventHandler(async (event) => {
     throw Error("WTF");
   }
 
-  await db("exams").update({
-    completed: 1,
-    feedback: message.content[0].text.value,
-    answers: questions
-      .map(({ answer }) => answer ?? "No answer provided.")
-      .join(answerSeparator),
-  });
+  await db("exams")
+    .where({ id })
+    .update({
+      completed: 1,
+      feedback: message.content[0].text.value,
+      answers: questions
+        .map(({ answer }) => answer ?? "No answer provided.")
+        .join(answerSeparator),
+    });
 
   return message.content[0].text.value;
 });

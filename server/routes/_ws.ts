@@ -51,6 +51,7 @@ export default defineWebSocketHandler({
       throw new Error(`No thread with id ${parsed.threadId} found!`);
     }
 
+    console.log("Parsed", parsed);
     if (!dbthread.summary && parsed.firstMessage) {
       console.log(`Summarizing using first message: ${parsed.firstMessage}`);
       getSummary(parsed.firstMessage).then((summary) => {

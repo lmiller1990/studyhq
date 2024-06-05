@@ -34,7 +34,7 @@ const allMessages = computed(() => {
 const submitting = ref(false);
 
 const firstMessage = computed(() => {
-  const f = allMessages.value[0];
+  const f = allMessages.value[1] as Message | undefined;
   if (f && f.content[0].type === "text") {
     return f.content[0].text.value;
   }
@@ -53,14 +53,14 @@ async function handleSubmitMessage() {
     method: "POST",
     body: {
       threadId: id,
-      message: cachedMsg,
+      message: cachedMsg.trim(),
     },
   });
 
   // 2. Push locally to make it show up
   localMessages.value.push(message);
 
-  // 3. Run1
+  // 3. Run!
   window.ws.send(
     JSON.stringify({
       threadId: id,
