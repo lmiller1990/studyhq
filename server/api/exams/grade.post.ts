@@ -1,8 +1,7 @@
 import { openai } from "~/server/open_ai";
 
-import { professorAssistantId } from "../exams.post";
 import { db } from "~/server/db";
-import { answerSeparator } from "~/server/shared";
+import { answerSeparator, assistants } from "~/server/shared";
 
 const assistantPrompt = (qa: string) => `
 You are a professor grading practice exams. The format for the exam is:
@@ -51,7 +50,7 @@ export default defineEventHandler(async (event) => {
   const dbexam = await db("exams").where({ id }).first();
 
   await openai.beta.threads.runs.createAndPoll(dbexam.openai_id, {
-    assistant_id: professorAssistantId,
+    assistant_id: assistants.examGradingBot,
     additional_messages: [
       {
         role: "assistant",

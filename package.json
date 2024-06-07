@@ -16,6 +16,7 @@
     "@pinia/nuxt": "^0.5.1",
     "@sidebase/nuxt-auth": "^0.7.2",
     "@types/events": "^3.0.3",
+    "@vueuse/core": "^10.10.0",
     "events": "^3.3.0",
     "knex": "^3.1.0",
     "nuxt": "^3.11.2",
@@ -23,6 +24,7 @@
     "pinia": "^2.1.7",
     "prettier": "^3.2.5",
     "sqlite3": "^5.1.7",
+    "vitest": "^1.6.0",
     "vue": "^3.4.27",
     "vue-router": "^4.3.2"
   }

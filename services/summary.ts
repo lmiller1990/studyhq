@@ -1,6 +1,5 @@
 import { openai } from "~/server/open_ai";
-
-const summaryAssistantId = "asst_6tEZd66IwR0xV0gAeDeQXPlO";
+import { assistants } from "~/server/shared";
 
 const summaryPrompt = (msg: string) =>
   `
@@ -20,7 +19,7 @@ export async function getSummary(msg: string) {
   });
 
   const s = await openai.beta.threads.runs.createAndPoll(t.id, {
-    assistant_id: summaryAssistantId,
+    assistant_id: assistants.summaryBot,
   });
 
   // get the response

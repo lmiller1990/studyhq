@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { createWebSocket } from "~/composables/createWebSocket";
+import { useMagicKeys, whenever } from "@vueuse/core";
 import { emitter } from "~/src/emitter";
 
 const { data: threads, refresh } = useFetch("/api/threads");
@@ -68,11 +69,27 @@ async function handleNewExam() {
 }
 
 const { signIn, getSession, data } = useAuth();
+
+const { ctrl, n } = useMagicKeys();
+
+watchEffect(() => {
+  if (ctrl.value && n.value) {
+    handleNewThread();
+  }
+});
 </script>
 
 <template>
   <UContainer class="pt-4">
-    <div class="flex justify-end w-full font-mono mb-4">StudyMATE.ai</div>
+    <div class="flex justify-end items-center w-full mb-4">
+      <NuxtLink
+        class="font-mono mr-4"
+        to="/"
+      >
+        StudyHQ.ai
+      </NuxtLink>
+      <SettingsMenu />
+    </div>
 
     <div class="flex h-full">
       <div class="w-72">
@@ -87,7 +104,16 @@ const { signIn, getSession, data } = useAuth();
             New Chat</UButton
           >
         </div>
-        <UVerticalNavigation :links="links" />
+        <UVerticalNavigation
+          class="max-h-[400px] overflow-scroll"
+          :links="links"
+        />
+        <div
+          v-if="!links.length"
+          class="flex justify-center"
+        >
+          <p class="text-sm text-gray-500">No chats.</p>
+        </div>
 
         <UDivider class="my-4" />
 
@@ -99,11 +125,22 @@ const { signIn, getSession, data } = useAuth();
             >New Exam</UButton
           >
         </div>
-        <UVerticalNavigation :links="examLinks" />
+        <UVerticalNavigation
+          class="max-h-[338px] overflow-scroll"
+          :links="examLinks"
+        />
+        <div
+          v-if="!examLinks.length"
+          class="flex justify-center"
+        >
+          <p class="text-sm text-gray-500">No exams.</p>
+        </div>
       </div>
 
       <div class="w-full h-full mb-4">
-        <NuxtPage />
+        <UContainer>
+          <NuxtPage />
+        </UContainer>
       </div>
     </div>
   </UContainer>

@@ -9,7 +9,7 @@ function handleGoogleAuth() {
 <template>
   <UContainer class="grid grid-rows-3 gap-y-6 h-full items-center mt-24">
     <h2 class="text-xl flex justify-center whitespace-pre">
-      Welcome to <span class="font-mono">StudyMATE.ai</span>.
+      Welcome to <span class="font-mono">StudyHQ.ai</span>.
     </h2>
     <div
       v-if="data?.user"

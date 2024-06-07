@@ -1,8 +1,7 @@
 import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
+import { assistants } from "~/server/shared";
 import { getSummary } from "~/services/summary";
-
-const assitantId = "asst_sxL8Gxy8meOwaf0vySOnegmu";
 
 interface StreamCallbackOptions {
   send: (chunk: string) => void;
@@ -73,7 +72,7 @@ export default defineWebSocketHandler({
     }
 
     // const openaiThread = await openai.beta.threads.retrieve(dbthread.openai_id);
-    streamRun(dbthread.openai_id, assitantId, {
+    streamRun(dbthread.openai_id, assistants.undergraduateTutorAssistant, {
       send: (textChunk) => {
         peer.send(
           JSON.stringify({

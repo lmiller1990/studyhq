@@ -1,10 +1,9 @@
+import { splitExamIntoQuestions } from "~/logic/exams";
 import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
-import { questionSeparator } from "~/server/shared";
+import { assistants, questionSeparator } from "~/server/shared";
 import { maybeGetUser } from "~/server/token";
 import { getSummary } from "~/services/summary";
-
-export const professorAssistantId = "asst_4wo91B5kt0nkr2mQG3XZoyZM";
 
 const examPrompt = (additionalContent: string, numQuestions: number) => `
 Hi. I want you to write a practice exam. Make ${numQuestions} questions. The format should be:
@@ -23,9 +22,9 @@ ${additionalContent}
 `;
 
 async function createExam(additionalContent: string) {
-  const content = examPrompt(additionalContent, 5);
+  const numQuestions = 5;
+  const content = examPrompt(additionalContent, numQuestions);
 
-  console.log("Creating thread for exam...");
   const emptyThread = await openai.beta.threads.create({
     messages: [
       {
@@ -35,10 +34,8 @@ async function createExam(additionalContent: string) {
     ],
   });
 
-  console.log("Created thread", emptyThread);
-  console.log("Creating exam...");
   const exam = await openai.beta.threads.runs.createAndPoll(emptyThread.id, {
-    assistant_id: professorAssistantId,
+    assistant_id: assistants.practiceExamBot,
   });
 
   const messages = await openai.beta.threads.messages.list(exam.thread_id, {
@@ -51,13 +48,12 @@ async function createExam(additionalContent: string) {
     throw Error("No exam - something is wrong");
   }
 
-  console.log("Content for exam is ", examMessage.content[0].text.value);
+  const questions = splitExamIntoQuestions(examMessage.content[0].text.value);
 
-  const questions = examMessage.content[0].text.value
-    .split("\n")
-    .reduce<
-      string[]
-    >((acc, curr) => (curr.length > 0 ? acc.concat(curr) : acc), []);
+  if (questions.length !== numQuestions) {
+    console.log(examMessage.content[0].text.value);
+    throw new Error(`Expected ${numQuestions}, got ${questions.length}`);
+  }
 
   return { exam, questions };
 }
@@ -65,8 +61,9 @@ async function createExam(additionalContent: string) {
 export default defineEventHandler(async (event) => {
   const body = await readBody<{ additionalContent: string }>(event);
   const user = await maybeGetUser(event);
+
   if (!user) {
-    return;
+    throw new Error("Need to be authenticated");
   }
 
   const [{ exam, questions }, examSummary] = await Promise.all([

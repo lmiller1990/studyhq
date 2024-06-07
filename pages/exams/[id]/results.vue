@@ -27,30 +27,28 @@ const items = [
 </script>
 
 <template>
-  <UContainer>
-    <UAccordion :items="items">
-      <template #exam>
-        <div class="leading-relaxed">
-          <div v-for="(_, idx) in questions">
-            <label>
-              {{ questions[idx] }}
-              <UTextarea
-                autoresize
-                class="my-2"
-                v-model="answers[idx]"
-                :disabled="true"
-              />
-            </label>
-          </div>
+  <UAccordion :items="items">
+    <template #exam>
+      <div class="leading-relaxed">
+        <div v-for="(_, idx) in questions">
+          <label>
+            {{ questions[idx] }}
+            <UTextarea
+              autoresize
+              class="my-2"
+              v-model="answers[idx]"
+              :disabled="true"
+            />
+          </label>
         </div>
-      </template>
-    </UAccordion>
-
-    <section class="mt-4">
-      <h2 class="font-bold">Feedback</h2>
-      <div class="whitespace-pre-wrap">
-        {{ exam?.feedback }}
       </div>
-    </section>
-  </UContainer>
+    </template>
+  </UAccordion>
+
+  <section class="mt-4">
+    <h2 class="font-bold">Feedback</h2>
+    <div class="whitespace-pre-wrap">
+      {{ exam?.feedback }}
+    </div>
+  </section>
 </template>
