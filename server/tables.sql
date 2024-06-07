@@ -7,7 +7,8 @@ CREATE TABLE assistants (
 -- Create the 'users' table
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT NOT NULL UNIQUE
+    email TEXT NOT NULL UNIQUE,
+    remaining_free_runs INTEGER DEFAULT 10
 );
 
 -- Create the 'threads' table
@@ -38,6 +39,6 @@ CREATE TABLE sessions (
     email TEXT NOT NULL,
     created TEXT DEFAULT (datetime('now')),
     FOREIGN KEY (email) REFERENCES users(email)
-)
+);
 
 INSERT INTO users (email) values ("lachlan@lachlan-miller.me");

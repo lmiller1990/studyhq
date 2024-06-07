@@ -81,7 +81,7 @@ watchEffect(() => {
 
 <template>
   <UContainer class="pt-4">
-    <div class="flex justify-end items-center w-full mb-4">
+    <div class="flex justify-between items-center w-full mb-4 mx-2">
       <NuxtLink
         class="font-mono mr-4"
         to="/"
