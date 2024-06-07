@@ -1,7 +1,12 @@
+import { tryDeductFreeMessage } from "~/logic/deductFreeMessage";
 import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
+import { getUser } from "~/server/token";
 
 export default defineEventHandler(async (event) => {
+  const user = await getUser(event);
+  await tryDeductFreeMessage(user);
+
   const body = await readBody<{ threadId: string; message: string }>(event);
   const thread = await db("threads").where({ id: body.threadId }).first();
 

@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { createWebSocket } from "~/composables/createWebSocket";
-import { useMagicKeys, whenever } from "@vueuse/core";
+import {
+  useInterval,
+  useIntervalFn,
+  useMagicKeys,
+  whenever,
+} from "@vueuse/core";
 import { emitter } from "~/src/emitter";
 
 const { data: threads, refresh } = useFetch("/api/threads");
@@ -10,6 +15,13 @@ declare global {
     ws: WebSocket;
   }
 }
+
+const { data: user, refresh: refreshUserData } = useFetch("/api/user");
+
+useIntervalFn(() => {
+  refreshUserData();
+  console.log("Counting...");
+}, 1000);
 
 onMounted(() => {
   emitter.on("refresh.exams", refreshExams);
@@ -88,6 +100,7 @@ watchEffect(() => {
       >
         StudyHQ.ai
       </NuxtLink>
+      {{ user }}
       <SettingsMenu />
     </div>
 

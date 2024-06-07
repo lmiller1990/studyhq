@@ -13,9 +13,8 @@ export function splitExamIntoQuestions(exam: string) {
 
   // Use match to find all relevant parts
   const split = exam.match(pattern);
-  console.log("Splitting", split);
 
-  if (!split) {
+  if (!split?.length) {
     throw new Error("No questions were found or unexpected format!");
   }
 

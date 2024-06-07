@@ -1,9 +1,9 @@
 import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
-import { maybeGetUser } from "~/server/token";
+import { getUser } from "~/server/token";
 
 export default defineEventHandler(async (event) => {
-  const user = await maybeGetUser(event);
+  const user = await getUser(event);
 
   if (!user) {
     return [];

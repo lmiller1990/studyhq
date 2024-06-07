@@ -1,9 +1,9 @@
 import { db } from "~/server/db";
-import { maybeGetUser } from "~/server/token";
+import { getUser } from "~/server/token";
 
 export default defineEventHandler(async (event) => {
   // HACK: https://github.com/nuxt/nuxt/issues/22488
-  const user = await maybeGetUser(event);
+  const user = await getUser(event);
   if (!user) {
     return [];
   }

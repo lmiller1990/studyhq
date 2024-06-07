@@ -8,7 +8,7 @@ CREATE TABLE assistants (
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT NOT NULL UNIQUE,
-    remaining_free_runs INTEGER DEFAULT 10
+    credit INTEGER DEFAULT 500
 );
 
 -- Create the 'threads' table

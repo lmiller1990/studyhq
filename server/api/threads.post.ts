@@ -1,13 +1,13 @@
+import { UnauthorizedError } from "~/logic/errors";
 import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
-import { maybeGetUser } from "~/server/token";
+import { getUser } from "~/server/token";
 
 export default defineEventHandler(async (event) => {
-  const user = await maybeGetUser(event);
-  console.log("user =>", user);
+  const user = await getUser(event);
 
   if (!user) {
-    return;
+    throw new UnauthorizedError();
   }
 
   const emptyThread = await openai.beta.threads.create();

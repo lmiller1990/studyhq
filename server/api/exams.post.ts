@@ -1,8 +1,9 @@
+import { tryDeductFreeMessage } from "~/logic/deductFreeMessage";
 import { splitExamIntoQuestions } from "~/logic/exams";
 import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
 import { assistants, questionSeparator } from "~/server/shared";
-import { maybeGetUser } from "~/server/token";
+import { getUser } from "~/server/token";
 import { getSummary } from "~/services/summary";
 
 const examPrompt = (additionalContent: string, numQuestions: number) => `
@@ -60,11 +61,9 @@ async function createExam(additionalContent: string) {
 
 export default defineEventHandler(async (event) => {
   const body = await readBody<{ additionalContent: string }>(event);
-  const user = await maybeGetUser(event);
+  const user = await getUser(event);
 
-  if (!user) {
-    throw new Error("Need to be authenticated");
-  }
+  await tryDeductFreeMessage(user);
 
   const [{ exam, questions }, examSummary] = await Promise.all([
     createExam(body.additionalContent),
