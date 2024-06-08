@@ -1,3 +1,4 @@
+import { DBUser } from "~/logic/dbTypes";
 import { ImpossibleCodeError } from "~/logic/errors";
 import { db } from "~/server/db";
 import { stripe } from "~/server/stripe";
@@ -19,7 +20,11 @@ export default defineEventHandler(async (event) => {
       sig!,
       endpointSecret,
     );
-    console.log("Here!", JSON.stringify(stripeEvent, null, 4));
+
+    console.log(
+      `Recevied stripe webhook ${stripeEvent.id} with event ${stripeEvent.type}`,
+    );
+
     if (stripeEvent.type === "checkout.session.completed") {
       // Retrieve the session. If you require line items in the response, you may include them by expanding line_items.
       const sessionWithLineItems = await stripe.checkout.sessions.retrieve(
@@ -38,16 +43,23 @@ export default defineEventHandler(async (event) => {
         );
       }
 
-      const user = await db("users").where({ email }).first();
+      const user = await db<DBUser>("users").where({ email }).first();
 
-      await db("users")
-        .where({ email })
-        .update({
-          credit: user.credit + amount,
-        });
+      if (!user) {
+        throw new Error(`Could not find user with email ${email}`);
+      }
+
+      const newBal = user?.credit + amount;
+
+      console.log(
+        `Loading ${amount} for email ${email}. Before: ${user.credit} After: ${newBal}`,
+      );
+
+      await db("users").where({ email }).update({
+        credit: newBal,
+      });
     }
   } catch (err) {
-    console.log("uh oh");
-    return `Webhook Error: ${err.message}`;
+    return `Webhook Error: ${(err as Error).message}`;
   }
 });

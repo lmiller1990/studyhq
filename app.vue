@@ -21,7 +21,7 @@ const { data: user, refresh: refreshUserData } = useFetch("/api/user");
 useIntervalFn(() => {
   refreshUserData();
   console.log("Counting...");
-}, 1000);
+}, 5000);
 
 onMounted(() => {
   emitter.on("refresh.exams", refreshExams);
@@ -89,6 +89,14 @@ watchEffect(() => {
     handleNewThread();
   }
 });
+
+const credit = computed(() => {
+  if (!user.value?.credit) {
+    return;
+  }
+  const usd = user?.value?.credit / 100;
+  return `$${usd.toFixed(2)}`;
+});
 </script>
 
 <template>
@@ -100,8 +108,15 @@ watchEffect(() => {
       >
         StudyHQ.ai
       </NuxtLink>
-      {{ user }}
-      <SettingsMenu />
+      <div class="flex items-center">
+        <span
+          v-if="credit"
+          class="mr-4"
+        >
+          {{ credit }}
+        </span>
+        <SettingsMenu />
+      </div>
     </div>
 
     <div class="flex h-full">
