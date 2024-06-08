@@ -75,7 +75,7 @@ const items = computed(() => {
       </template>
 
       <p>
-        <span class="font-mono">StudyHQ.ai</span>
+        <span class="font-mono">StudyHQ</span>
         is not a "pay as you go" service. You pay for study credits, and use
         them as you message and generate exams.
       </p>
