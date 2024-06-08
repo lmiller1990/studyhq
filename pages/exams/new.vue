@@ -23,8 +23,11 @@ async function handleCreateExam() {
 <template>
   <p class="leading-relaxed mb-2">
     Welcome to practice exams. Enter the content below, and get a personalized
-    exam. Once you complete the exam, you'll receive a final grade and
-    recommendations to improve.
+    exam. You can copy paste lecture notes, articles, anything!
+  </p>
+  <p class="leading-relaxed mb-2">
+    Once you complete the exam, you'll receive grades and an explanation telling
+    you where you went wrong.
   </p>
   <form
     @submit.prevent="handleCreateExam"
