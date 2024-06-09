@@ -3,6 +3,7 @@ import GoogleProvider from "next-auth/providers/google";
 import { db } from "~/server/db";
 
 export default NuxtAuthHandler({
+  secret: process.env.SECRET,
   cookies: {
     sessionToken: {
       options: {},
