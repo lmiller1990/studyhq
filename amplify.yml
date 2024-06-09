@@ -7,7 +7,9 @@ frontend:
         - npx --yes nypm i
     build:
       commands:
-        - env | grep -e AUTH_ORIGIN  -e SECRET >> .env.production
+        - echo "HELLO!!!!"
+        - echo $AUTH_ORIGIN
+        - env | grep -e AUTH_ORIGIN -e SECRET >> .env.production
         - npm run build
   artifacts:
     baseDirectory: '.output/public'
