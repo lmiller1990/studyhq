@@ -13,4 +13,14 @@ export default defineNuxtConfig({
     },
     preset: "aws-amplify",
   },
+  runtimeConfig: {
+    public: {
+      auth: {
+        // @ts-ignore
+        computed: {
+          origin: process.env.NEXTAUTH_URL || process.env.AUTH_ORIGIN,
+        },
+      },
+    },
+  },
 });
