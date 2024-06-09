@@ -7,8 +7,7 @@ frontend:
         - npx --yes nypm i
     build:
       commands:
-        - [ ! -f .env ] || export $(grep -v '^#' .env | xargs)
-
+        - set AUTH_ORIGIN=https://main.deg33yac8sm17.amplifyapp.com
         - npm run build
   artifacts:
     baseDirectory: '.output/public'
