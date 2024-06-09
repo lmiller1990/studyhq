@@ -16,6 +16,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       auth: {
+        baseURL: process.env.AUTH_ORIGIN,
         // @ts-ignore
         computed: {
           origin: process.env.NEXTAUTH_URL || process.env.AUTH_ORIGIN,
