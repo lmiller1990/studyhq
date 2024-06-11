@@ -10,7 +10,6 @@ frontend:
         - set AUTH_ORIGIN=https://main.deg33yac8sm17.amplifyapp.com set NEXTAUTH_URL=https://main.deg33yac8sm17.amplifyapp.com
         - npm run build
   artifacts:
-    baseDirectory: '.output/public'
+    baseDirectory: ".output/public"
     files:
-      - '**/*'
-
+      - "**/*"

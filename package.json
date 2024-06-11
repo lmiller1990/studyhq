@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@aws-amplify/backend": "^1.0.3",
+    "@aws-sdk/client-dynamodb": "^3.592.0",
+    "@aws-sdk/util-dynamodb": "^3.592.0",
     "@nuxt/ui": "^2.16.0",
     "@nuxt/ui-pro": "^1.2.0",
     "@pinia/nuxt": "^0.5.1",

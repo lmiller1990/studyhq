@@ -1,6 +1,6 @@
 import { NuxtAuthHandler } from "#auth";
 import GoogleProvider from "next-auth/providers/google";
-import { db } from "~/server/db";
+import { insertUser, queryForUser } from "~/src/dynamo";
 
 export default NuxtAuthHandler({
   secret: process.env.SECRET,
@@ -27,16 +27,22 @@ export default NuxtAuthHandler({
   ],
   callbacks: {
     signIn: async (options) => {
-      const exists = await db("users")
-        .where({ email: options.user.email })
-        .first();
-      if (exists) {
+      if (!options.user.email) {
+        throw new Error(`Expected user.email to be populated`);
+      }
+
+      console.log(`Querying for ${options.user.email}`);
+
+      const dbuser = await queryForUser(options.user.email);
+
+      if (dbuser) {
         console.log(`Found user with email ${options.user.email}`);
         return true;
       }
 
-      // sign them up
-      await db("users").insert({ email: options.user.email });
+      console.log(`Signing up ${options.user.email}`);
+
+      await insertUser(options.user.email);
 
       return true;
     },

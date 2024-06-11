@@ -1,9 +1,12 @@
 import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
+import { getUser } from "~/server/token";
+import { queryForThreadById } from "~/src/dynamo";
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
-  const thread = await db("threads").where({ id }).first();
+  const user = await getUser(event);
+  const thread = await queryForThreadById(user.email, id!);
 
   if (!thread) {
     throw new Error(`No thread with id ${id} found!`);

@@ -1,15 +1,15 @@
 import type { H3Event, EventHandlerRequest } from "h3";
 import { getToken } from "#auth";
-import { db } from "~/server/db";
 import { ImpossibleCodeError, UnauthorizedError } from "~/logic/errors";
-import { DBUser } from "~/logic/dbTypes";
+import { DynamoSchema } from "~/logic/dbTypes";
+import { queryForUser } from "~/src/dynamo";
 
 /**
  * @returns User email if found in token
  */
 export async function getUser(
   event: H3Event<EventHandlerRequest>,
-): Promise<DBUser> {
+): Promise<DynamoSchema["User"]> {
   const t = await getToken({
     event,
     cookieName: "studymate-auth.session-token",
@@ -20,14 +20,13 @@ export async function getUser(
   }
 
   // check db
-  const exists = await db("users").where({ email: t.email }).first();
+  const exists = await queryForUser(t.email);
 
   if (exists) {
     return {
-      ...exists,
-      id: exists.id as number,
-      email: exists.email as string,
-      credit: exists.credit as number,
+      email: exists.pk.S!,
+      sk: exists.sk.S! as "PROFILE",
+      credit: Number(exists.credit.N ?? 0),
     };
   }
 

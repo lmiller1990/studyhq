@@ -1,5 +1,6 @@
 import { db } from "~/server/db";
 import { getUser } from "~/server/token";
+import { queryForExamsByUser } from "~/src/dynamo";
 
 export default defineEventHandler(async (event) => {
   // HACK: https://github.com/nuxt/nuxt/issues/22488
@@ -8,16 +9,13 @@ export default defineEventHandler(async (event) => {
     return [];
   }
 
-  const exams = await db("exams")
-    .where({ user_id: user.id })
-    .orderBy("created", "desc")
-    .select("*");
+  const exams = await queryForExamsByUser(user.email);
 
   return exams.map((exam) => {
     return {
-      created: exam.created as string,
-      id: exam.id.toString() as string,
-      summary: exam.summary.toString() as string,
+      created_at: exam.created_at,
+      id: exam.sk,
+      summary: exam.summary,
     };
   });
 });
