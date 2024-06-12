@@ -28,7 +28,8 @@ export async function queryForUser(
 
   const dbuser = result.Items?.[0];
 
-  if (!dbuser || !dbuser.credit.N || !dbuser.email.S || !dbuser.sk.S) {
+  if (!dbuser || !dbuser.credit?.N || !dbuser.pk?.S || !dbuser.sk?.S) {
+    console.log(`dbuser`, JSON.stringify(dbuser, null, 4));
     throw new ImpossibleCodeError(
       `User with matching email: ${email} not found`,
     );
@@ -36,7 +37,7 @@ export async function queryForUser(
 
   return {
     credit: Number(dbuser.credit.N),
-    email: dbuser.email.S,
+    email: dbuser.pk.S,
     sk: "PROFILE",
   };
 }
