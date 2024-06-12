@@ -1,5 +1,3 @@
-import { tryDeductFreeMessage } from "~/logic/deductFreeMessage";
-import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
 import { getUser } from "~/server/token";
 import { queryForThreadById } from "~/src/dynamo";

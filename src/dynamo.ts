@@ -8,10 +8,13 @@ import {
 import crypto from "node:crypto";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import type { DynamoSchema } from "~/logic/dbTypes";
+import { ImpossibleCodeError } from "~/logic/errors";
 
 const dynamo = new DynamoDB();
 
-export async function queryForUser(email: string) {
+export async function queryForUser(
+  email: string,
+): Promise<DynamoSchema["User"]> {
   const result = await dynamo.send(
     new QueryCommand({
       TableName: "studyhq",
@@ -25,7 +28,41 @@ export async function queryForUser(email: string) {
 
   const dbuser = result.Items?.[0];
 
-  return dbuser;
+  if (!dbuser || !dbuser.credit.N || !dbuser.email.S || !dbuser.sk.S) {
+    throw new ImpossibleCodeError(
+      `User with matching email: ${email} not found`,
+    );
+  }
+
+  return {
+    credit: Number(dbuser.credit.N),
+    email: dbuser.email.S,
+    sk: "PROFILE",
+  };
+}
+
+export async function updateUserCredit(email: string, newBalance: number) {
+  return await dynamo.send(
+    new UpdateItemCommand({
+      TableName: "studyhq",
+      Key: {
+        pk: {
+          S: email,
+        },
+        sk: {
+          S: `PROFILE`,
+        },
+      },
+      AttributeUpdates: {
+        credit: {
+          Value: {
+            N: newBalance.toString(),
+          },
+          Action: "PUT",
+        },
+      },
+    }),
+  );
 }
 
 export async function queryForThreadsByUser(email: string) {
@@ -100,10 +137,10 @@ export async function queryForExamsByUser(email: string) {
       sk: item.sk.S!,
       openai_id: item.openai_id.S!,
       questions: item.questions.S!,
-      completed: item.completed.BOOL!,
+      completed: item.completed?.BOOL ?? false,
       summary: item.summary.S,
-      answers: item.answers.S,
-      feedback: item.feedback.S,
+      answers: item.answers?.S ?? "",
+      feedback: item.feedback?.S ?? "",
       created_at: item.created_at.N!,
     };
   });
@@ -180,4 +217,122 @@ export function skToId(sk: string) {
     throw new Error(`sk should be of format blah#uuid`);
   }
   return sk.split("#")[1];
+}
+
+export async function insertExam({
+  questions,
+  openai_id,
+  summary,
+  email,
+  uuid,
+}: {
+  email: string;
+  uuid: string;
+  openai_id: string;
+  questions: string;
+  summary: string;
+}) {
+  return await dynamo.send(
+    new PutItemCommand({
+      TableName: "studyhq",
+      Item: marshall({
+        pk: email,
+        sk: `exam#${uuid}`,
+        questions,
+        created_at: Date.now(),
+        openai_id,
+        summary,
+      }),
+    }),
+  );
+}
+
+export async function queryForExamById(email: string, uuid: string) {
+  const exams = await queryForExamsByUser(email);
+  const e = exams.find((x) => x.sk === `exam#${uuid}`);
+  if (!e) {
+    throw new Error(`Could not find exam with id ${uuid}`);
+  }
+  return e;
+}
+
+export async function updateExam(options: {
+  email: string;
+  uuid: string;
+  feedback: string;
+  answers: string;
+}) {
+  const { email, uuid, feedback, answers } = options;
+
+  return await dynamo.send(
+    new UpdateItemCommand({
+      TableName: "studyhq",
+      Key: {
+        pk: {
+          S: email,
+        },
+        sk: {
+          S: `exam#${uuid}`,
+        },
+      },
+      AttributeUpdates: {
+        feedback: {
+          Value: {
+            S: feedback,
+          },
+          Action: "PUT",
+        },
+        completed: {
+          Value: {
+            BOOL: true,
+          },
+          Action: "PUT",
+        },
+        answers: {
+          Value: {
+            S: answers,
+          },
+          Action: "PUT",
+        },
+      },
+    }),
+  );
+}
+
+export async function resetExam(options: { email: string; uuid: string }) {
+  const { email, uuid } = options;
+
+  return await dynamo.send(
+    new UpdateItemCommand({
+      TableName: "studyhq",
+      Key: {
+        pk: {
+          S: email,
+        },
+        sk: {
+          S: `exam#${uuid}`,
+        },
+      },
+      AttributeUpdates: {
+        feedback: {
+          Value: {
+            S: "",
+          },
+          Action: "PUT",
+        },
+        completed: {
+          Value: {
+            BOOL: false,
+          },
+          Action: "PUT",
+        },
+        answers: {
+          Value: {
+            S: "",
+          },
+          Action: "PUT",
+        },
+      },
+    }),
+  );
 }

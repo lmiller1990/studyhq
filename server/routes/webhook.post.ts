@@ -1,8 +1,6 @@
-import { DBUser } from "~/logic/dbTypes";
 import { ImpossibleCodeError } from "~/logic/errors";
-import { db } from "~/server/db";
 import { stripe } from "~/server/stripe";
-import { getUser } from "~/server/token";
+import { queryForUser, updateUserCredit } from "~/src/dynamo";
 
 const endpointSecret =
   "whsec_c2ff6c274da62105ebd4c5e7e78ff293a9e3cd186d8e6bc394e9070e92919f37";
@@ -43,21 +41,19 @@ export default defineEventHandler(async (event) => {
         );
       }
 
-      const user = await db<DBUser>("users").where({ email }).first();
+      const user = await queryForUser(email);
 
       if (!user) {
         throw new Error(`Could not find user with email ${email}`);
       }
 
-      const newBal = user?.credit + amount;
+      const newBal = user.credit + amount;
 
       console.log(
         `Loading ${amount} for email ${email}. Before: ${user.credit} After: ${newBal}`,
       );
 
-      await db("users").where({ email }).update({
-        credit: newBal,
-      });
+      await updateUserCredit(email, newBal);
     }
   } catch (err) {
     return `Webhook Error: ${(err as Error).message}`;

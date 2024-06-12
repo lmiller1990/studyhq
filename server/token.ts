@@ -20,17 +20,5 @@ export async function getUser(
   }
 
   // check db
-  const exists = await queryForUser(t.email);
-
-  if (exists) {
-    return {
-      email: exists.pk.S!,
-      sk: exists.sk.S! as "PROFILE",
-      credit: Number(exists.credit.N ?? 0),
-    };
-  }
-
-  throw new ImpossibleCodeError(
-    `User with matching email: ${t.email} not found`,
-  );
+  return await queryForUser(t.email);
 }

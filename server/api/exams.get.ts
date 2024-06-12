@@ -1,6 +1,5 @@
-import { db } from "~/server/db";
 import { getUser } from "~/server/token";
-import { queryForExamsByUser } from "~/src/dynamo";
+import { queryForExamsByUser, skToId } from "~/src/dynamo";
 
 export default defineEventHandler(async (event) => {
   // HACK: https://github.com/nuxt/nuxt/issues/22488
@@ -14,7 +13,7 @@ export default defineEventHandler(async (event) => {
   return exams.map((exam) => {
     return {
       created_at: exam.created_at,
-      id: exam.sk,
+      id: skToId(exam.sk),
       summary: exam.summary,
     };
   });

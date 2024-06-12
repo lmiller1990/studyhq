@@ -1,14 +1,11 @@
-import { db } from "~/server/db";
+import { getUser } from "~/server/token";
+import { resetExam } from "~/src/dynamo";
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, "id");
-  console.log({ id });
+  const user = await getUser(event);
 
-  await db("exams").where({ id }).update({
-    feedback: null,
-    completed: false,
-    answers: null,
-  });
+  await resetExam({ email: user.email, uuid: id! });
 
   return;
 });

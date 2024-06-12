@@ -1,4 +1,3 @@
-import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
 import { assistants } from "~/server/shared";
 import { getSummary } from "~/services/summary";
