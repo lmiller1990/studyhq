@@ -3,6 +3,7 @@ import { createWebSocket } from "~/composables/createWebSocket";
 import { emitter } from "~/src/emitter";
 import { useIntervalFn, useMagicKeys } from "@vueuse/core";
 const { ctrl, n } = useMagicKeys();
+
 const { data: threads, refresh } = useFetch("/api/threads");
 
 declare global {
@@ -11,9 +12,9 @@ declare global {
   }
 }
 
-const { data } = useAuth();
+const { loggedIn } = useUserSession();
 
-if (!data.value?.user) {
+if (!loggedIn.value) {
   await navigateTo("/");
 }
 
@@ -26,17 +27,13 @@ useIntervalFn(() => {
 
 onMounted(() => {
   emitter.on("refresh.exams", refreshExams);
-
   const ws = createWebSocket({
     name: "top-level",
   });
-
   if (!ws) {
     return;
   }
-
   window.ws = ws;
-
   registerWebSocketCallback((payload: Payload) => {
     if (payload.type === "summary.completed") {
       refresh();
@@ -151,10 +148,10 @@ const credit = computed(() => {
             >New Exam</UButton
           >
         </div>
-        <UVerticalNavigation
+        <!-- <UVerticalNavigation
           class="max-h-[338px] overflow-scroll"
           :links="examLinks"
-        />
+        /> -->
         <div
           v-if="!examLinks.length"
           class="flex justify-center"

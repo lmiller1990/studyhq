@@ -5,16 +5,18 @@ import {
   UpdateItemCommand,
   UpdateTimeToLiveCommand,
 } from "@aws-sdk/client-dynamodb";
-import crypto from "node:crypto";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import type { DynamoSchema } from "~/logic/dbTypes";
-import { ImpossibleCodeError } from "~/logic/errors";
+import type { DynamoSchema } from "~/src/dbTypes";
 
-const dynamo = new DynamoDB();
+let dynamo: DynamoDB;
 
-export async function queryForUser(
-  email: string,
-): Promise<DynamoSchema["User"]> {
+export async function queryCheckUserExists(email: string) {
+  if (!dynamo) {
+    dynamo = new DynamoDB({
+      region: "ap-southeast-2",
+    });
+  }
+
   const result = await dynamo.send(
     new QueryCommand({
       TableName: "studyhq",
@@ -26,13 +28,17 @@ export async function queryForUser(
     }),
   );
 
-  const dbuser = result.Items?.[0];
+  return result.Items?.[0] ?? null;
+}
+
+export async function queryForUser(
+  email: string,
+): Promise<DynamoSchema["User"]> {
+  const dbuser = await queryCheckUserExists(email);
 
   if (!dbuser || !dbuser.credit?.N || !dbuser.pk?.S || !dbuser.sk?.S) {
     console.log(`dbuser`, JSON.stringify(dbuser, null, 4));
-    throw new ImpossibleCodeError(
-      `User with matching email: ${email} not found`,
-    );
+    throw new Error(`User with matching email: ${email} not found`);
   }
 
   return {

@@ -53,22 +53,61 @@ async function handleSubmitMessage() {
   localMessages.value.push(createTempMsg(cachedMsg, "user"));
   msg.value = "";
 
-  // 2. Write message to OpenAI
-  await $fetch("/api/message", {
-    method: "POST",
-    body: {
-      threadId: id,
-      message: cachedMsg,
-    },
-  });
+  // New temp message for the system message
+  const temp = createTempMsg("", "system");
+  localMessages.value.push(temp);
+  const last = localMessages.value.at(-1)!;
 
-  // 3. Run!
-  window.ws.send(
-    JSON.stringify({
-      threadId: id,
-      firstMessage: firstMessage.value ?? null,
-    }),
-  );
+  // 2. Write message to OpenAI
+  window
+    .fetch("/api/message", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        threadId: id,
+        message: cachedMsg,
+      }),
+    })
+    .then((response) => response.body)
+    .then((rs) => {
+      const reader = rs?.getReader()!;
+
+      return new ReadableStream({
+        async start(controller) {
+          while (true) {
+            const { done, value } = await reader.read();
+            var text = new TextDecoder().decode(value);
+
+            // it always will be, but just to make TS happy...
+            if (last.content[0].type === "text") {
+              last.content[0].text.value += text;
+            }
+
+            if (done) {
+              break;
+            }
+
+            controller.enqueue(value);
+          }
+
+          controller.close();
+          reader.releaseLock();
+        },
+      });
+    })
+    // Create a new response out of the stream
+    .then((rs) => new Response(rs))
+    // Create an object URL for the response
+    .then((response) => response.text())
+    .then((text) => {
+      console.log("Final =>", text);
+    })
+    // Update image
+    .catch((err) => {
+      console.error("error...", err);
+    });
 
   msg.value = "";
 }
@@ -119,13 +158,13 @@ function callback(payload: Payload) {
   }
 }
 
-onMounted(() => {
-  registerWebSocketCallback(callback);
-});
+// onMounted(() => {
+//   registerWebSocketCallback(callback);
+// });
 
-onBeforeUnmount(() => {
-  removeWebSocketCallback(callback);
-});
+// onBeforeUnmount(() => {
+//   removeWebSocketCallback(callback);
+// });
 
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === "Enter" && !event.shiftKey) {

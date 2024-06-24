@@ -1,6 +1,5 @@
 import type { H3Event, EventHandlerRequest } from "h3";
-import { getToken } from "#auth";
-import { ImpossibleCodeError, UnauthorizedError } from "~/logic/errors";
+import { UnauthorizedError } from "~/logic/errors";
 import { DynamoSchema } from "~/logic/dbTypes";
 import { queryForUser } from "~/src/dynamo";
 
@@ -10,15 +9,14 @@ import { queryForUser } from "~/src/dynamo";
 export async function getUser(
   event: H3Event<EventHandlerRequest>,
 ): Promise<DynamoSchema["User"]> {
-  const t = await getToken({
-    event,
-    cookieName: "studymate-auth.session-token",
-  });
+  const session = await getUserSession(event);
 
-  if (!t?.email) {
+  // @ts-ignore
+  if (!session.user?.email) {
     throw new UnauthorizedError();
   }
 
   // check db
-  return await queryForUser(t.email);
+  // @ts-ignore
+  return await queryForUser(session.user.email);
 }

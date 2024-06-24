@@ -27,7 +27,7 @@ export default defineEventHandler(async (event) => {
     }),
   );
 
-  all.sort((x, y) => (x.created_at - y.created_at ? -1 : 1));
+  all.sort((x, y) => (x.created_at - y.created_at ? 1 : -1));
 
   return all;
 });
