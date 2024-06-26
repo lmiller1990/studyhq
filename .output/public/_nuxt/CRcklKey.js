@@ -1,1 +1,0 @@
-import{u as o}from"./cJH77P2W.js";import{f as a,j as n,o as c,c as r}from"./D1rtcPht.js";import"./DvDH6DOc.js";const _={class:"text-xl"},x=a({__name:"index",async setup(i){let t,s;const{data:e}=([t,s]=n(()=>o("/api/assistants","$YobmIVpCNq")),t=await t,s(),t);return console.log(e.value),(p,m)=>(c(),r("h1",_,"Assistants"))}});export{x as default};
