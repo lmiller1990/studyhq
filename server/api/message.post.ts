@@ -2,8 +2,7 @@ import { openai } from "~/server/open_ai";
 import { assistants } from "~/server/shared";
 import { getUser } from "~/server/token";
 import { queryForThreadById } from "~/src/dynamo";
-import { Readable, Writable } from "stream";
-import Stream from "stream/promises";
+import { Writable } from "stream";
 
 interface StreamCallbackOptions {
   send: (chunk: string) => void;
@@ -30,9 +29,8 @@ async function streamRun(
       onComplete();
     } else if (chunk.event === "thread.run.created") {
       onStart();
-      //
     } else {
-      console.log(`Used event: ${chunk.event}`);
+      // console.log(`Used event: ${chunk.event}`);
     }
   }
 }
@@ -49,39 +47,30 @@ export default defineEventHandler(async (event) => {
   }
 
   console.log(`Creating message: ${body.message} in thread: ${body.threadId}`);
-  const message = await openai.beta.threads.messages.create(thread.openai_id, {
+
+  await openai.beta.threads.messages.create(thread.openai_id, {
     role: "user",
     content: body.message,
   });
 
   const res = event.node.res;
   const writer = new Writable({
-    write(chunk, encoding, callback) {
-      console.log("Write", chunk.toString());
+    write(chunk, _encoding, cb) {
       res.write(chunk.toString());
-      // responseBody += chunk.toString();
-      callback();
+      cb();
     },
   });
 
-  // const stream = await Stream.pipeline(new Readable(), writer);
-
-  const s = await streamRun(
-    thread.openai_id,
-    assistants.undergraduateTutorAssistant,
-    {
-      onComplete: () => {
-        console.log("Done");
-        res.end();
-        return { result: "OK" };
-      },
-      onStart: () => console.log("Starting..."),
-      send: (msg) => {
-        console.log("Sending...", msg);
-        writer.write(msg);
-      },
+  await streamRun(thread.openai_id, assistants.undergraduateTutorAssistant, {
+    onComplete: () => {
+      res.end();
+      return {};
     },
-  );
-
-  // return message;
+    onStart: () => {
+      console.log("Starting...");
+    },
+    send: (msg) => {
+      writer.write(msg);
+    },
+  });
 });

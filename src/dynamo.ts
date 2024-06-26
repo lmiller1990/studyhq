@@ -13,7 +13,11 @@ let dynamo: DynamoDB;
 export async function queryCheckUserExists(email: string) {
   if (!dynamo) {
     dynamo = new DynamoDB({
-      region: "ap-southeast-2",
+      region: process.env.AWS_REGION!,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY_ID!,
+      },
     });
   }
 
@@ -84,14 +88,14 @@ export async function queryForThreadsByUser(email: string) {
     }),
   );
 
-  const threads = (results?.Items ?? []).filter((x) => x.summary?.S);
+  const threads = results?.Items ?? []; // .filter((x) => x.summary?.S);
 
   return threads.map<DynamoSchema["Thread"]>((thread) => {
     return {
       email: thread.pk.S!,
       openai_id: thread.openai_id.S!,
       sk: thread.sk.S!,
-      summary: thread.summary.S,
+      summary: thread.summary?.S ?? "",
     };
   });
 }

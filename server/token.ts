@@ -1,6 +1,6 @@
 import type { H3Event, EventHandlerRequest } from "h3";
 import { UnauthorizedError } from "~/logic/errors";
-import { DynamoSchema } from "~/logic/dbTypes";
+import { DynamoSchema } from "~/src/dbTypes";
 import { queryForUser } from "~/src/dynamo";
 
 /**

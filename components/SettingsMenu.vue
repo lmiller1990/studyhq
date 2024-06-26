@@ -17,7 +17,7 @@ function handleShowPurchaseModal() {
 
 async function handleBuy() {
   const data = await $fetch("/api/stripe", {
-    body: JSON.stringify({ amount: 5 }),
+    body: JSON.stringify({ amount: 5, domain: window.location.href }),
     method: "POST",
   });
 

@@ -19,5 +19,8 @@ export default defineEventHandler(async (event) => {
     },
   );
 
-  return threadMessages.data.reverse();
+  return {
+    messages: threadMessages.data.reverse(),
+    summary: thread.summary,
+  };
 });

@@ -10,9 +10,6 @@ export default defineEventHandler(async (event) => {
   }
 
   const threadsForUser = await queryForThreadsByUser(user.email);
-  // await db("threads")
-  //   .where({ user_id: user.id })
-  //   .whereNotNull("summary");
 
   const all = await Promise.all(
     threadsForUser.map(async (x) => {
@@ -27,7 +24,7 @@ export default defineEventHandler(async (event) => {
     }),
   );
 
-  all.sort((x, y) => (x.created_at - y.created_at ? 1 : -1));
+  all.sort((x, y) => (x.created_at < y.created_at ? 1 : -1));
 
   return all;
 });

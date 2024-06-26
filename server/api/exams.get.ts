@@ -10,6 +10,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const exams = await queryForExamsByUser(user.email);
+  console.log(exams);
 
   return exams.map((exam) => {
     return {
