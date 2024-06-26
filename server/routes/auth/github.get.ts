@@ -14,7 +14,7 @@ export default oauth.githubEventHandler({
   },
   // Optional, will return a json error and 401 status code by default
   onError(event, error) {
-    console.error("GitHub OAuth error:", error);
+    console.error("GitHub OAuth error:", error, event.node.req.originalUrl);
     return sendRedirect(event, "/");
   },
 });
