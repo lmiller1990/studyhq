@@ -8,19 +8,17 @@ import {
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import type { DynamoSchema } from "~/src/dbTypes";
 
-let dynamo: DynamoDB;
+console.log(process.env.AWS_REGION!);
+
+const dynamo = new DynamoDB({
+  region: process.env.AWS_REGION!,
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY_ID!,
+  },
+});
 
 export async function queryCheckUserExists(email: string) {
-  if (!dynamo) {
-    dynamo = new DynamoDB({
-      region: process.env.AWS_REGION!,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY_ID!,
-      },
-    });
-  }
-
   const result = await dynamo.send(
     new QueryCommand({
       TableName: "studyhq",
