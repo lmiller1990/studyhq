@@ -8,6 +8,7 @@ export default oauth.githubEventHandler({
     await setUserSession(event, {
       user: {
         githubId: user.id,
+        email: user.email,
       },
     });
     return sendRedirect(event, "/");
