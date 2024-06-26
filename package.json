@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build && cd .output/server && aws s3 cp .output/public/_nuxt/ s3://lachlannuxttest/_nuxt --recursive",
+    "build": "nuxt build && aws s3 cp .output/public/_nuxt/ s3://lachlannuxttest/_nuxt --recursive",
     "dev": "AWS_PROFILE=studyhq nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
