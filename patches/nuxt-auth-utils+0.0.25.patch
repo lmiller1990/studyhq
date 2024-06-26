@@ -1,0 +1,13 @@
+diff --git a/node_modules/nuxt-auth-utils/dist/runtime/server/lib/oauth/google.mjs b/node_modules/nuxt-auth-utils/dist/runtime/server/lib/oauth/google.mjs
+index fa3cae0..1af4ca4 100644
+--- a/node_modules/nuxt-auth-utils/dist/runtime/server/lib/oauth/google.mjs
++++ b/node_modules/nuxt-auth-utils/dist/runtime/server/lib/oauth/google.mjs
+@@ -31,7 +31,7 @@ export function googleEventHandler({
+         throw error;
+       return onError(event, error);
+     }
+-    const redirectUrl = getRequestURL(event).href;
++    const redirectUrl = getRequestURL(event).href.replace("http://", "https://");
+     if (!code) {
+       config.scope = config.scope || ["email", "profile"];
+       return sendRedirect(
