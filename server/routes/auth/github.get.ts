@@ -7,8 +7,8 @@ export default oauth.githubEventHandler({
   async onSuccess(event, { user, tokens }) {
     await setUserSession(event, {
       user: {
+        ...user,
         githubId: user.id,
-        email: user.email,
       },
     });
 

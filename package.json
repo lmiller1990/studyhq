@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "nuxt build && cd .output/server && zip -r ../../lambda.zip *",
+    "build": "nuxt build && cd .output/server && aws s3 cp .output/public/_nuxt/ s3://lachlannuxttest/_nuxt --recursive",
     "dev": "AWS_PROFILE=studyhq nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
@@ -26,6 +26,7 @@
     "nuxt-auth-utils": "^0.0.25",
     "openai": "^4.47.2",
     "pinia": "^2.1.7",
+    "pm2": "^5.4.1",
     "prettier": "^3.2.5",
     "stripe": "^15.10.0",
     "vitest": "^1.6.0",

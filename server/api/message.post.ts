@@ -67,7 +67,7 @@ export default defineEventHandler(async (event) => {
       return {};
     },
     onStart: () => {
-      console.log("Starting...");
+      // console.log("Starting...");
     },
     send: (msg) => {
       writer.write(msg);
