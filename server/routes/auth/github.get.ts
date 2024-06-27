@@ -16,16 +16,11 @@ export default oauth.githubEventHandler({
       throw new Error(`Expected user.email to be populated`);
     }
 
-    console.log(`Querying for ${user.email}`);
-
     const dbuser = await queryCheckUserExists(user.email);
 
     if (dbuser) {
-      console.log(`Found user with email ${user.email}`);
       return sendRedirect(event, "/");
     }
-
-    console.log(`Signing up ${user.email}`);
 
     await insertUser(user.email);
 
