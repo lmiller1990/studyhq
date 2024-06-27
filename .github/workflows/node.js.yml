@@ -36,4 +36,5 @@ jobs:
       run: |
         echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/ssh_key
         chmod 600 /tmp/ssh_key
-        rsync -avz -e "ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no" .output/ ubuntu@ec2-54-206-38-229.ap-southeast-2.compute.amazonaws.com:/studymate
+        rsync -avz -e "ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no" .output/ ubuntu@ec2-54-206-38-229.ap-southeast-2.compute.amazonaws.com:/home/ubuntu/studymate/.output
+        ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no ubuntu@ec2-54-206-38-229.ap-southeast-2.compute.amazonaws.com "pm2 restart all"
