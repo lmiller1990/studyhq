@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { emitter } from "~/src/emitter";
 import { useIntervalFn, useMagicKeys } from "@vueuse/core";
+import SidebarLinks from "~/components/SidebarLinks.vue";
 const { ctrl, n } = useMagicKeys();
 
 const { data: threads, refresh: refreshThreads } =
@@ -12,7 +13,14 @@ declare global {
   }
 }
 
-const { loggedIn } = useUserSession();
+const isOpen = ref(false);
+
+const { clear, loggedIn } = useUserSession();
+
+const { loading: signingOut, run: handleSignOut } = useLoading(async () => {
+  await clear();
+  await navigateTo("/");
+});
 
 if (!loggedIn.value) {
   await navigateTo("/");
@@ -40,6 +48,7 @@ const links = computed(() => {
         }`,
       icon: "i-heroicons-document-solid",
       to: `/threads/${thread.id}`,
+      click: () => (isOpen.value = false),
     };
   });
 });
@@ -49,21 +58,23 @@ const { data: exams, refresh: refreshExams } = await useFetch("/api/exams");
 const examLinks = computed(() =>
   (exams.value ?? []).map((exam) => {
     return {
-      label: exam.summary,
+      label: exam.summary ?? "",
       icon: "i-heroicons-document-text",
       to: `/exams/${exam.id}`,
+      click: () => (isOpen.value = false),
     };
   }),
 );
 
-const { run: handleNewThread, loading: creatingNewThread } = useLoading(
-  async () => {
-    const t = await $fetch("/api/threads", { method: "POST" });
-    await navigateTo(`/threads/${t!.id}`);
-  },
-);
+const { run: _handleNewThread, loading: creatingNewThread } = useCreateThread();
+
+async function handleNewThread() {
+  await _handleNewThread();
+  isOpen.value = false;
+}
 
 async function handleNewExam() {
+  isOpen.value = false;
   await navigateTo(`/exams/new`);
 }
 
@@ -99,55 +110,100 @@ const credit = computed(() => {
         >
           {{ credit }}
         </span>
-        <SettingsMenu />
+
+        <div class="hidden md:block">
+          <SettingsMenu />
+        </div>
+
+        <div class="md:hidden">
+          <UButton
+            color="white"
+            trailing-icon="i-heroicons-bars-3"
+            @click="() => (isOpen = true)"
+          />
+          <USlideover v-model="isOpen">
+            <div>
+              <div class="flex items-center justify-between mt-4 mx-2">
+                <UButton
+                  @click="handleSignOut"
+                  variant="link"
+                  size="xs"
+                  :disabled="signingOut"
+                  >Sign out</UButton
+                >
+                <UButton
+                  color="gray"
+                  variant="ghost"
+                  size="sm"
+                  icon="i-heroicons-x-mark-20-solid"
+                  square
+                  padded
+                  @click="isOpen = false"
+                />
+              </div>
+
+              <UCard
+                class="flex flex-col flex-1"
+                :ui="{
+                  body: { base: 'flex-1' },
+                  ring: '',
+                  divide: 'divide-y divide-gray-100 dark:divide-gray-800',
+                }"
+              >
+                <template #header>
+                  <div class="flex justify-between items-center">
+                    <h2>Chats</h2>
+                    <UButton
+                      size="xs"
+                      @click="handleNewThread"
+                      :disabled="creatingNewThread"
+                      >New Chat</UButton
+                    >
+                  </div>
+                </template>
+                <div>
+                  <UVerticalNavigation :links="links" />
+                </div>
+              </UCard>
+
+              <UCard
+                class="flex flex-col flex-1"
+                :ui="{
+                  body: { base: 'flex-1' },
+                  ring: '',
+                  divide: 'divide-y divide-gray-100 dark:divide-gray-800',
+                }"
+              >
+                <template #header>
+                  <div class="flex justify-between items-center">
+                    <h2>Exams</h2>
+                    <UButton
+                      size="xs"
+                      @click="handleNewExam"
+                      :disabled="creatingNewThread"
+                      >New Exam</UButton
+                    >
+                  </div>
+                </template>
+                <div>
+                  <UVerticalNavigation :links="examLinks" />
+                </div>
+              </UCard>
+            </div>
+          </USlideover>
+        </div>
       </div>
     </div>
 
     <div class="flex h-full">
-      <div class="w-72">
-        <div class="flex justify-between items-center">
-          <h2 class="font-bold m-2">Chats</h2>
-          <UButton
-            size="xs"
-            :disabled="creatingNewThread"
-            :loading="creatingNewThread"
-            @click="handleNewThread"
-          >
-            New Chat</UButton
-          >
-        </div>
-        <UVerticalNavigation
-          class="max-h-[400px] overflow-scroll"
-          :links="links"
-        />
-        <div
-          v-if="!links.length"
-          class="flex justify-center"
-        >
-          <p class="text-sm text-gray-500">No chats.</p>
-        </div>
-
-        <UDivider class="my-4" />
-
-        <div class="flex justify-between items-center">
-          <h2 class="font-bold m-2">Exams</h2>
-          <UButton
-            size="xs"
-            @click="handleNewExam"
-            >New Exam</UButton
-          >
-        </div>
-        <UVerticalNavigation
-          class="max-h-[338px] overflow-scroll"
-          :links="examLinks"
-        />
-        <div
-          v-if="!examLinks.length"
-          class="flex justify-center"
-        >
-          <p class="text-sm text-gray-500">No exams.</p>
-        </div>
-      </div>
+      <SidebarLinks
+        class="hidden md:block"
+        :chat-links="links"
+        :exam-links="examLinks"
+        :disabled="creatingNewThread"
+        @new-exam="handleNewExam"
+        @new-thread="handleNewThread"
+      />
 
       <div class="w-full h-full mb-4">
         <UContainer>

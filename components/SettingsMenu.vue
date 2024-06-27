@@ -8,11 +8,8 @@ const { loading: signingOut, run: handleSignOut } = useLoading(async () => {
 
 const isOpen = ref(false);
 
-const link = `https://buy.stripe.com/test_6oE16faCzeD20EM6oo?prefilled_email=${encodeURIComponent(user.value?.email)}`;
-
 function handleShowPurchaseModal() {
   isOpen.value = true;
-  //
 }
 
 async function handleBuy() {
@@ -22,7 +19,6 @@ async function handleBuy() {
   });
 
   document.location = data as string;
-  //
 }
 
 const items = computed(() => {

@@ -22,7 +22,7 @@
     "@types/events": "^3.0.3",
     "@vueuse/core": "^10.10.0",
     "events": "^3.3.0",
-    "nuxt": "3.11.2",
+    "nuxt": "3.12.2",
     "nuxt-auth-utils": "^0.0.25",
     "openai": "^4.47.2",
     "patch-package": "^8.0.0",

@@ -1,5 +1,13 @@
 <script setup lang="ts">
+import NewButtons from "~/components/NewButtons.vue";
+
 const { user, loggedIn } = useUserSession();
+
+async function handleNewExam() {
+  await navigateTo(`/exams/new`);
+}
+
+const { run, loading } = useCreateThread();
 </script>
 
 <template>
@@ -13,6 +21,13 @@ const { user, loggedIn } = useUserSession();
     >
       Welcome back, {{ user?.name }}.
     </div>
+
+    <NewButtons
+      class="md:hidden"
+      @new-exam="handleNewExam"
+      @new-thread="run"
+      :disabled="loading"
+    />
   </UContainer>
 </template>
 
