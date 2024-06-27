@@ -3,9 +3,9 @@ definePageMeta({
   layout: "public",
 });
 
-const { data } = useAuth();
+const { user, session, loggedIn } = useUserSession();
 
-if (data.value?.user) {
+if (loggedIn.value) {
   await navigateTo("/app");
 }
 </script>
@@ -23,8 +23,9 @@ if (data.value?.user) {
             Sign in below to start studying and taking practice exams and get
             $5.00 free credits!
           </p>
-          <div class="mb-8">
+          <div class="mb-8 grid grid-cols-2 gap-x-1">
             <SignInGoogle />
+            <SignInGithub />
           </div>
         </div>
       </div>

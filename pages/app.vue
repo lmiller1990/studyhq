@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { data } = useAuth();
+const { user, loggedIn } = useUserSession();
 </script>
 
 <template>
@@ -8,10 +8,10 @@ const { data } = useAuth();
       Welcome to <span class="font-mono">StudyHQ</span>.
     </h2>
     <div
-      v-if="data?.user"
+      v-if="loggedIn"
       class="flex justify-center"
     >
-      Welcome back, {{ data.user.name }}.
+      Welcome back, {{ user?.name }}.
     </div>
   </UContainer>
 </template>

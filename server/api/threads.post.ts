@@ -1,7 +1,9 @@
+import crypto from "node:crypto";
 import { UnauthorizedError } from "~/logic/errors";
-import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
 import { getUser } from "~/server/token";
+import { getSummary } from "~/services/summary";
+import { insertThread, skToId } from "~/src/dynamo";
 
 export default defineEventHandler(async (event) => {
   const user = await getUser(event);
@@ -11,12 +13,14 @@ export default defineEventHandler(async (event) => {
   }
 
   const emptyThread = await openai.beta.threads.create();
-  const dbThread = await db("threads")
-    .insert({ openai_id: emptyThread.id, user_id: user.id })
-    .returning("*");
+  const sk = `thread#${crypto.randomUUID()}`;
+
+  // getSummary(parsed.firstMessage).then((summary) => {
+
+  await insertThread(user.email, sk, emptyThread.id);
 
   return {
-    id: (dbThread[0].id as number).toString(),
+    id: skToId(sk),
     openai_id: emptyThread.id,
     created_at: emptyThread.created_at,
   };

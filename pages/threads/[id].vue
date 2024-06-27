@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import type { SerializeObject } from "nitropack";
 import type { Message } from "openai/resources/beta/threads/messages";
-import {
-  removeWebSocketCallback,
-  type Payload,
-} from "~/composables/createWebSocket";
+import { emitter } from "~/src/emitter";
 
 const route = useRoute();
 
@@ -28,16 +25,30 @@ const allMessages = computed(() => {
       "system",
     ),
   ]
-    .concat(data.value ?? [])
+    .concat(data.value?.messages ?? [])
     .concat(localMessages.value);
 });
 
 const submitting = ref(false);
 
-const firstMessage = computed(() => {
+const firstUserMessage = computed(() => {
   const f = allMessages.value[1] as Message | undefined;
   if (f && f.content[0].type === "text") {
     return f.content[0].text.value;
+  }
+});
+
+watchEffect(async () => {
+  if (firstUserMessage.value && !data.value?.summary) {
+    // no summary has been generated, make one using the user's first message.
+    await $fetch("/api/summary", {
+      method: "POST",
+      body: {
+        message: firstUserMessage.value,
+        threadId: route.params.id,
+      },
+    });
+    emitter.emit("refresh.threads");
   }
 });
 
@@ -53,22 +64,47 @@ async function handleSubmitMessage() {
   localMessages.value.push(createTempMsg(cachedMsg, "user"));
   msg.value = "";
 
+  // New temp message for the system message
+  const temp = createTempMsg("", "system");
+  localMessages.value.push(temp);
+  const last = localMessages.value.at(-1)!;
+
   // 2. Write message to OpenAI
-  await $fetch("/api/message", {
+  const response = await window.fetch("/api/message", {
     method: "POST",
-    body: {
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
       threadId: id,
       message: cachedMsg,
+    }),
+  });
+  const reader = response?.body?.getReader()!;
+
+  return new ReadableStream({
+    async start(controller) {
+      while (true) {
+        const { done, value } = await reader.read();
+        var text = new TextDecoder().decode(value);
+
+        // it always will be, but just to make TS happy...
+        if (last.content[0].type === "text") {
+          last.content[0].text.value += text;
+        }
+
+        if (done) {
+          submitting.value = false;
+          break;
+        }
+
+        controller.enqueue(value);
+      }
+
+      controller.close();
+      reader.releaseLock();
     },
   });
-
-  // 3. Run!
-  window.ws.send(
-    JSON.stringify({
-      threadId: id,
-      firstMessage: firstMessage.value ?? null,
-    }),
-  );
 
   msg.value = "";
 }
@@ -100,32 +136,6 @@ function createTempMsg(msgText: string, role: "system" | "user"): any {
     metadata: {},
   };
 }
-
-function callback(payload: Payload) {
-  if (payload.type === "thread.run.created") {
-    // Create a temporary message for the incoming data and push it into the local messages.
-    // We will update it with the stream data as it comes in.
-    const temp = createTempMsg("", "system");
-    localMessages.value.push(temp);
-  } else if (payload.type === "thread.message.delta") {
-    const last = localMessages.value.at(-1)!;
-    // it always will be, but just to make TS happy...
-    if (last.content[0].type === "text") {
-      last.content[0].text.value += payload.text;
-    }
-  } else if (payload.type === "thread.run.completed") {
-    submitting.value = false;
-    // get a summary (maybe)
-  }
-}
-
-onMounted(() => {
-  registerWebSocketCallback(callback);
-});
-
-onBeforeUnmount(() => {
-  removeWebSocketCallback(callback);
-});
 
 function handleKeydown(event: KeyboardEvent) {
   if (event.key === "Enter" && !event.shiftKey) {

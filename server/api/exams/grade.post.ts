@@ -1,7 +1,8 @@
 import { openai } from "~/server/open_ai";
 
-import { db } from "~/server/db";
 import { answerSeparator, assistants } from "~/server/shared";
+import { queryForExamById, updateExam } from "~/src/dynamo";
+import { getUser } from "~/server/token";
 
 const assistantPrompt = (qa: string) => `
 You are a professor grading practice exams. The format for the exam is:
@@ -43,11 +44,13 @@ export default defineEventHandler(async (event) => {
   }>(event);
 
   console.log(`Grading exam id ${id}`);
+  const user = await getUser(event);
 
   const content = questions
     .map(({ question, answer }) => `${question}\n\nAnswer: ${answer}`)
     .join("\n\n");
-  const dbexam = await db("exams").where({ id }).first();
+
+  const dbexam = await queryForExamById(user.email, id);
 
   await openai.beta.threads.runs.createAndPoll(dbexam.openai_id, {
     assistant_id: assistants.examGradingBot,
@@ -70,15 +73,14 @@ export default defineEventHandler(async (event) => {
     throw Error("WTF");
   }
 
-  await db("exams")
-    .where({ id })
-    .update({
-      completed: 1,
-      feedback: message.content[0].text.value,
-      answers: questions
-        .map(({ answer }) => answer ?? "No answer provided.")
-        .join(answerSeparator),
-    });
+  await updateExam({
+    email: user.email,
+    uuid: id,
+    feedback: message.content[0].text.value,
+    answers: questions
+      .map(({ answer }) => answer ?? "No answer provided.")
+      .join(answerSeparator),
+  });
 
   return message.content[0].text.value;
 });

@@ -4,7 +4,7 @@ import { getUser } from "~/server/token";
 const YOUR_DOMAIN = "http://localhost:3000";
 
 export default defineEventHandler(async (event) => {
-  const body = await readBody<{ amount: number }>(event);
+  const body = await readBody<{ amount: number; domain: string }>(event);
   const user = await getUser(event);
   const session = await stripe.checkout.sessions.create({
     line_items: [
@@ -18,8 +18,8 @@ export default defineEventHandler(async (event) => {
     metadata: {
       email: user.email,
     },
-    success_url: `${YOUR_DOMAIN}`,
-    cancel_url: `${YOUR_DOMAIN}?credits_failed`,
+    success_url: `${body.domain}`,
+    cancel_url: `${body.domain}?credits_failed`,
   });
 
   return session.url;

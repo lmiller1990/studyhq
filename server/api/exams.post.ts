@@ -1,10 +1,10 @@
-import { tryDeductFreeMessage } from "~/logic/deductFreeMessage";
+import crypto from "node:crypto";
 import { splitExamIntoQuestions } from "~/logic/exams";
-import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
 import { assistants, questionSeparator } from "~/server/shared";
 import { getUser } from "~/server/token";
 import { getSummary } from "~/services/summary";
+import { insertExam } from "~/src/dynamo";
 
 const examPrompt = (additionalContent: string, numQuestions: number) => `
 Hi. I want you to write a practice exam. Make ${numQuestions} questions. The format should be:
@@ -63,21 +63,22 @@ export default defineEventHandler(async (event) => {
   const body = await readBody<{ additionalContent: string }>(event);
   const user = await getUser(event);
 
-  await tryDeductFreeMessage(user);
+  // await tryDeductFreeMessage(user);
 
   const [{ exam, questions }, examSummary] = await Promise.all([
     createExam(body.additionalContent),
     getSummary(body.additionalContent),
   ]);
 
-  const dbExam = await db("exams")
-    .insert({
-      openai_id: exam.thread_id,
-      questions: questions.join(questionSeparator),
-      summary: examSummary,
-      user_id: user.id,
-    })
-    .returning("id");
+  const uuid = crypto.randomUUID();
 
-  return { id: dbExam[0].id as string };
+  await insertExam({
+    email: user.email,
+    uuid,
+    openai_id: exam.thread_id,
+    questions: questions.join(questionSeparator),
+    summary: examSummary,
+  });
+
+  return { id: uuid };
 });

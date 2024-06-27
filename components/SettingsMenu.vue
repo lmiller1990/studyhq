@@ -1,11 +1,14 @@
 <script setup lang="ts">
-const { signOut, data, signIn } = useAuth();
+const { user, clear, loggedIn } = useUserSession();
 
-const { loading: signingOut, run: handleSignOut } = useLoading(signOut);
+const { loading: signingOut, run: handleSignOut } = useLoading(async () => {
+  await clear();
+  await navigateTo("/");
+});
 
 const isOpen = ref(false);
 
-const link = `https://buy.stripe.com/test_6oE16faCzeD20EM6oo?prefilled_email=${encodeURIComponent(data.value?.user?.email!)}`;
+const link = `https://buy.stripe.com/test_6oE16faCzeD20EM6oo?prefilled_email=${encodeURIComponent(user.value?.email)}`;
 
 function handleShowPurchaseModal() {
   isOpen.value = true;
@@ -14,7 +17,7 @@ function handleShowPurchaseModal() {
 
 async function handleBuy() {
   const data = await $fetch("/api/stripe", {
-    body: JSON.stringify({ amount: 5 }),
+    body: JSON.stringify({ amount: 5, domain: window.location.href }),
     method: "POST",
   });
 
@@ -23,7 +26,7 @@ async function handleBuy() {
 }
 
 const items = computed(() => {
-  if (data.value) {
+  if (loggedIn.value) {
     return [
       [
         {
@@ -45,7 +48,7 @@ const items = computed(() => {
     [
       {
         label: "Sign up to start studying!",
-        click: () => signIn("google"),
+        click: async () => await navigateTo("/auth/google"),
       },
     ],
   ];

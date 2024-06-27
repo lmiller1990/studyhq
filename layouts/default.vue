@@ -1,9 +1,10 @@
 <script lang="ts" setup>
-import { createWebSocket } from "~/composables/createWebSocket";
 import { emitter } from "~/src/emitter";
 import { useIntervalFn, useMagicKeys } from "@vueuse/core";
 const { ctrl, n } = useMagicKeys();
-const { data: threads, refresh } = useFetch("/api/threads");
+
+const { data: threads, refresh: refreshThreads } =
+  await useFetch("/api/threads");
 
 declare global {
   interface Window {
@@ -11,13 +12,13 @@ declare global {
   }
 }
 
-const { data } = useAuth();
+const { loggedIn } = useUserSession();
 
-if (!data.value?.user) {
+if (!loggedIn.value) {
   await navigateTo("/");
 }
 
-const { data: user, refresh: refreshUserData } = useFetch("/api/user");
+const { data: user, refresh: refreshUserData } = await useFetch("/api/user");
 
 useIntervalFn(() => {
   refreshUserData();
@@ -26,22 +27,7 @@ useIntervalFn(() => {
 
 onMounted(() => {
   emitter.on("refresh.exams", refreshExams);
-
-  const ws = createWebSocket({
-    name: "top-level",
-  });
-
-  if (!ws) {
-    return;
-  }
-
-  window.ws = ws;
-
-  registerWebSocketCallback((payload: Payload) => {
-    if (payload.type === "summary.completed") {
-      refresh();
-    }
-  });
+  emitter.on("refresh.threads", refreshThreads);
 });
 
 const links = computed(() => {

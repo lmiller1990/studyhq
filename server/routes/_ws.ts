@@ -1,7 +1,7 @@
-import { db } from "~/server/db";
 import { openai } from "~/server/open_ai";
 import { assistants } from "~/server/shared";
 import { getSummary } from "~/services/summary";
+import { queryForThreadById, updateThreadSummary } from "~/src/dynamo";
 
 interface StreamCallbackOptions {
   send: (chunk: string) => void;
@@ -45,7 +45,11 @@ export default defineWebSocketHandler({
   async message(peer, message) {
     const parsed = JSON.parse(message.text());
 
-    const dbthread = await db("threads").where({ id: parsed.threadId }).first();
+    const dbthread = await queryForThreadById(
+      "lachlan@vuejs-course.com",
+      parsed.threadId,
+    );
+    // await db("threads").where({ id: parsed.threadId }).first();
     if (!dbthread) {
       throw new Error(`No thread with id ${parsed.threadId} found!`);
     }
@@ -54,20 +58,24 @@ export default defineWebSocketHandler({
     if (!dbthread.summary && parsed.firstMessage) {
       console.log(`Summarizing using first message: ${parsed.firstMessage}`);
       getSummary(parsed.firstMessage).then((summary) => {
-        db("threads")
-          .where({ id: dbthread.id })
-          .update({
-            summary,
-          })
-          .then(() => {
-            console.log("Done summarizing.");
-            console.log("sending...");
-            peer.send(
-              JSON.stringify({
-                type: "summary.completed",
-              }),
-            );
-          });
+        // db("threads")
+        //   .where({ id: dbthread.id })
+        //   .update({
+        //     summary,
+        //   })
+        updateThreadSummary(
+          "lachlan@vuejs-course.com",
+          parsed.threadId,
+          summary,
+        ).then(() => {
+          console.log("Done summarizing.");
+          console.log("sending...");
+          peer.send(
+            JSON.stringify({
+              type: "summary.completed",
+            }),
+          );
+        });
       });
     }
 
