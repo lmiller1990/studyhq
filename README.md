@@ -1,7 +1,5 @@
 # StudyHQ
 
-![](./screenshots/logo.png)
-
 AI powered revision, exam generator and grader. 
 
 https://studyhq.app
