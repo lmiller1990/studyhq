@@ -24,12 +24,12 @@ async function handleBuy() {
 const items = computed(() => {
   if (loggedIn.value) {
     return [
-      [
-        {
-          label: "Purchase Credits",
-          click: handleShowPurchaseModal,
-        },
-      ],
+      // [
+      //   {
+      //     label: "Purchase Credits",
+      //     click: handleShowPurchaseModal,
+      //   },
+      // ],
       [
         {
           label: "Sign Out",

@@ -21,11 +21,11 @@ async function handleCreateExam() {
 </script>
 
 <template>
-  <p class="leading-relaxed mb-2">
+  <p class="mb-2">
     Welcome to practice exams. Enter the content below, and get a personalized
     exam. You can copy paste lecture notes, articles, anything!
   </p>
-  <p class="leading-relaxed mb-2">
+  <p class="mb-2">
     Once you complete the exam, you'll receive grades and an explanation telling
     you where you went wrong.
   </p>

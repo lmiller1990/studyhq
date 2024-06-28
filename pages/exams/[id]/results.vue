@@ -29,7 +29,7 @@ const items = [
 <template>
   <UAccordion :items="items">
     <template #exam>
-      <div class="leading-relaxed">
+      <div>
         <div v-for="(_, idx) in questions">
           <label>
             {{ questions[idx] }}

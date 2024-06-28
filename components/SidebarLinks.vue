@@ -20,7 +20,7 @@ const emits = defineEmits<{
 <template>
   <div class="w-72">
     <div class="flex justify-between items-center">
-      <h2 class="font-bold m-2">Chats</h2>
+      <h4 class="font-bold m-2">Chats</h4>
       <UButton
         size="xs"
         :disabled="disabled"
@@ -44,7 +44,7 @@ const emits = defineEmits<{
     <UDivider class="my-4" />
 
     <div class="flex justify-between items-center">
-      <h2 class="font-bold m-2">Exams</h2>
+      <h4 class="font-bold m-2">Exams</h4>
       <UButton
         size="xs"
         :disabled="disabled"

@@ -78,10 +78,7 @@ const { run: handleReset, loading: resetting } = useLoading(resetExam);
     />
   </p>
 
-  <form
-    class="leading-relaxed"
-    @submit.prevent="handleSubmitExam"
-  >
+  <form @submit.prevent="handleSubmitExam">
     <div v-for="(qa, idx) of questionsAndAnswers">
       <label>
         {{ qa.question }}

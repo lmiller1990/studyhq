@@ -28,10 +28,10 @@ if (!loggedIn.value) {
 
 const { data: user, refresh: refreshUserData } = await useFetch("/api/user");
 
-useIntervalFn(() => {
-  refreshUserData();
-  console.log("Counting...");
-}, 5000);
+// useIntervalFn(() => {
+//   refreshUserData();
+//   console.log("Counting...");
+// }, 10000);
 
 onMounted(() => {
   emitter.on("refresh.exams", refreshExams);
@@ -104,12 +104,12 @@ const credit = computed(() => {
         StudyHQ
       </NuxtLink>
       <div class="flex items-center">
-        <span
+        <!-- <span
           v-if="credit"
           class="mr-4"
         >
           {{ credit }}
-        </span>
+        </span> -->
 
         <div class="hidden md:block">
           <SettingsMenu />

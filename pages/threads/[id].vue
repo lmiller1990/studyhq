@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { SerializeObject } from "nitropack";
+import markdownit from "markdown-it";
 import type { Message } from "openai/resources/beta/threads/messages";
 import { emitter } from "~/src/emitter";
 
 const route = useRoute();
+const md = markdownit();
 
 const id = route.params.id;
 
@@ -103,10 +105,13 @@ async function handleSubmitMessage() {
 
       controller.close();
       reader.releaseLock();
+      msg.value = "";
     },
   });
+}
 
-  msg.value = "";
+function toHtml(msg: string) {
+  return md.render(msg);
 }
 
 function createTempMsg(msgText: string, role: "system" | "user"): any {
@@ -145,7 +150,7 @@ function handleKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <ul class="leading-relaxed">
+  <ul>
     <li
       v-for="message of allMessages"
       class="flex w-full my-4"
@@ -153,13 +158,17 @@ function handleKeydown(event: KeyboardEvent) {
     >
       <div
         v-if="message.content[0]?.type === 'text'"
-        class="p-1 rounded px-2 whitespace-pre-wrap"
+        class="p-1 rounded px-2"
         :class="{
           'bg-gray-200 dark:bg-gray-700': message.role === 'user',
+          'dark:bg-gray-600': message.role === 'system',
           'max-w-[50vw]': message.role === 'user',
         }"
       >
-        {{ message.content[0].text.value }}
+        <span
+          class="msg"
+          v-html="toHtml(message.content[0].text.value)"
+        />
       </div>
     </li>
   </ul>
@@ -184,3 +193,40 @@ function handleKeydown(event: KeyboardEvent) {
     >
   </form>
 </template>
+
+<style>
+.msg > p:not(:first-of-type) {
+  padding-top: 10px; /* Adjust the value as needed */
+}
+
+.msg > h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  padding-top: 10px; /* Adjust the value as needed */
+}
+
+.msg > ul {
+  list-style: disc;
+  list-style-position: inside;
+  margin-left: 10px;
+}
+
+pre {
+  white-space: pre-wrap;
+}
+
+pre {
+  @apply dark:bg-gray-700;
+}
+
+.msg > pre {
+  @apply border-gray-100 border p-2 mt-2 rounded;
+}
+
+li {
+  @apply my-1;
+}
+</style>

@@ -2,16 +2,14 @@ import {
   DynamoDB,
   PutItemCommand,
   QueryCommand,
+  ScanCommand,
   UpdateItemCommand,
-  UpdateTimeToLiveCommand,
 } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import type { DynamoSchema } from "~/src/dbTypes";
 
-console.log(process.env.AWS_REGION!);
-
 const dynamo = new DynamoDB({
-  region: process.env.AWS_REGION!,
+  region: process.env.AWS_DEFAULT_REGION!,
   credentials: {
     accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
@@ -263,6 +261,23 @@ export async function queryForExamById(email: string, uuid: string) {
     throw new Error(`Could not find exam with id ${uuid}`);
   }
   return e;
+}
+
+export async function queryAllUsers() {
+  const command = new QueryCommand({
+    TableName: "studyhq",
+    IndexName: "sk-index",
+    KeyConditionExpression: "sk = :sk",
+    ExpressionAttributeValues: {
+      ":sk": { S: "PROFILE" },
+    },
+  });
+
+  const items = await dynamo.send(command);
+  return (items.Items ?? []).map((x) => unmarshall(x)) as Array<{
+    pk: string;
+    credit: number;
+  }>;
 }
 
 export async function updateExam(options: {
