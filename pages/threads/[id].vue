@@ -161,7 +161,7 @@ function handleKeydown(event: KeyboardEvent) {
         class="p-1 rounded px-2"
         :class="{
           'bg-gray-200 dark:bg-gray-700': message.role === 'user',
-          'dark:bg-gray-600': message.role === 'system',
+          'dark:bg-gray-800': message.role !== 'user',
           'max-w-[50vw]': message.role === 'user',
         }"
       >
@@ -211,7 +211,12 @@ h6 {
 .msg > ul {
   list-style: disc;
   list-style-position: inside;
-  margin-left: 10px;
+  margin-left: 20px;
+}
+
+.msg > ol {
+  list-style: initial;
+  margin-left: 20px;
 }
 
 pre {

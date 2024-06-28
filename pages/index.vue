@@ -20,8 +20,7 @@ if (loggedIn.value) {
             AI powered revision, exam generator and grader.
           </p>
           <p class="mb-8">
-            Sign in below to start studying and taking practice exams and get
-            $5.00 free credits!
+            Sign in below to start studying and taking practice exams for free!
           </p>
           <div class="mb-8 grid grid-cols-2 gap-x-1">
             <SignInGoogle />

@@ -23,11 +23,12 @@ async function handleCreateExam() {
 <template>
   <p class="mb-2">
     Welcome to practice exams. Enter the content below, and get a personalized
-    exam. You can copy paste lecture notes, articles, anything!
+    exam. Enter a topic, or even paste in all your notes - StudyHQ will figure
+    it out and make an exam to test your understanding.
   </p>
   <p class="mb-2">
-    Once you complete the exam, you'll receive grades and an explanation telling
-    you where you went wrong.
+    Once you complete the exam, you will receive grades and an explanation
+    telling you where you went wrong.
   </p>
   <form
     @submit.prevent="handleCreateExam"

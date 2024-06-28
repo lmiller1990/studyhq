@@ -49,7 +49,7 @@ const emits = defineEmits<{
         size="xs"
         :disabled="disabled"
         :loading="disabled"
-        @click="emits('newThread')"
+        @click="emits('newExam')"
         >New Exam</UButton
       >
     </div>
