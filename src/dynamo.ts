@@ -239,6 +239,17 @@ export async function insertExam({
   questions: string;
   summary: string;
 }) {
+  console.log({
+    Item: marshall({
+      pk: email,
+      sk: `exam#${uuid}`,
+      questions,
+      created_at: Date.now(),
+      openai_id,
+      summary,
+    }),
+  });
+
   return await dynamo.send(
     new PutItemCommand({
       TableName: "studyhq",

@@ -2,7 +2,15 @@
 import { emitter } from "~/src/emitter";
 import { useIntervalFn, useMagicKeys } from "@vueuse/core";
 import SidebarLinks from "~/components/SidebarLinks.vue";
+import { useAuth } from "~/composables/useAuth";
+
 const { ctrl, n } = useMagicKeys();
+const { clear, loggedIn } = useUserSession();
+const { setGuest, guestMode } = useAuth();
+
+if (!loggedIn.value && !guestMode.value) {
+  await navigateTo("/");
+}
 
 const { data: threads, refresh: refreshThreads } =
   await useFetch("/api/threads");
@@ -15,16 +23,10 @@ declare global {
 
 const isOpen = ref(false);
 
-const { clear, loggedIn } = useUserSession();
-
 const { loading: signingOut, run: handleSignOut } = useLoading(async () => {
   await clear();
   await navigateTo("/");
 });
-
-if (!loggedIn.value) {
-  await navigateTo("/");
-}
 
 const { data: user, refresh: refreshUserData } = await useFetch("/api/user");
 
