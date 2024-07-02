@@ -19,6 +19,7 @@ jobs:
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
       EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+      DO_SSH_KEY: ${{ secrets.DO_SSH_KEY }}
 
     steps:
       - uses: actions/checkout@v4
@@ -31,7 +32,8 @@ jobs:
       - run: yarn build
       - name: Deploy to EC2
         run: |
-          echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/ssh_key
+          # echo "${{ secrets.EC2_SSH_KEY }}" > /tmp/ssh_key
+          echo "${{ secrets.DO_SSH_KEY }}" > /tmp/ssh_key
           chmod 600 /tmp/ssh_key
-          rsync -avz -e "ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no" .output/ ubuntu@ec2-54-206-38-229.ap-southeast-2.compute.amazonaws.com:/home/ubuntu/studymate/.output
-          ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no ubuntu@ec2-54-206-38-229.ap-southeast-2.compute.amazonaws.com 'bash -c "source ~/.bashrc && source ~/.nvm/nvm.sh && pm2 restart all"'
+          rsync -avz -e "ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no" .output/ root@147.182.211.19:/home/ubuntu/studyhq/.output
+          ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no root@147.182.211.19 'bash -c "source ~/.bashrc && source ~/.nvm/nvm.sh && pm2 restart all"'
