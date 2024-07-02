@@ -1,6 +1,6 @@
 import { ref } from "vue";
 
-const guestMode = ref(true);
+const guestMode = ref(false);
 const showSignUpModal = ref(false);
 
 export function useAuth() {

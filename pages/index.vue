@@ -60,12 +60,12 @@ async function handleExample(example: (typeof examples)[number]) {
               class="my-12 h-0.5 border-t-0 bg-neutral-100 w-full dark:bg-white/10"
             />
           </div>
-          <p class="mb-8 flex">
+          <p class="grid grid-cols-2 md:grid-cols-4">
             <UButton
               v-for="example of examples"
               :loading="loading && clickedSubject === example.subject"
               :disabled="loading"
-              class="mx-1"
+              class="mx-1 mb-1 md:mb-0 flex justify-center"
               :color="example.color"
               @click="() => handleExample(example)"
               >{{
