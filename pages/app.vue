@@ -15,11 +15,19 @@ const { run, loading } = useCreateThread();
     <h2 class="text-xl flex justify-center whitespace-pre">
       Welcome to <span class="font-mono">StudyHQ</span>.
     </h2>
-    <div v-if="loggedIn" class="flex justify-center">
+    <div
+      v-if="loggedIn"
+      class="flex justify-center"
+    >
       Welcome back, {{ user?.name ?? "guest" }}.
     </div>
 
-    <NewButtons class="md:hidden" @new-exam="handleNewExam" @new-thread="run" :disabled="loading" />
+    <NewButtons
+      class="md:hidden"
+      @new-exam="handleNewExam"
+      @new-thread="run"
+      :disabled="loading"
+    />
   </UContainer>
 </template>
 

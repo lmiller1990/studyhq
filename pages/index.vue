@@ -17,7 +17,12 @@ const examples = [
   { color: "fuchsia", subject: "Business" },
 ] as const;
 
+const loading = ref(false);
+const clickedSubject = ref("");
+
 async function handleExample(example: (typeof examples)[number]) {
+  loading.value = true;
+  clickedSubject.value = example.subject;
   setGuest();
   const res = await $fetch("/api/guest", {
     method: "POST",
@@ -25,6 +30,7 @@ async function handleExample(example: (typeof examples)[number]) {
       subject: example.subject,
     },
   });
+  loading.value = false;
   await navigateTo(`/exams/${res.id}`);
 }
 </script>
@@ -54,13 +60,19 @@ async function handleExample(example: (typeof examples)[number]) {
               class="my-12 h-0.5 border-t-0 bg-neutral-100 w-full dark:bg-white/10"
             />
           </div>
-          <p class="mb-8">
+          <p class="mb-8 flex">
             <UButton
               v-for="example of examples"
+              :loading="loading && clickedSubject === example.subject"
+              :disabled="loading"
               class="mx-1"
               :color="example.color"
               @click="() => handleExample(example)"
-              >{{ example.subject }}
+              >{{
+                loading && clickedSubject === example.subject
+                  ? "Generating new quiz..."
+                  : example.subject
+              }}
             </UButton>
           </p>
         </div>

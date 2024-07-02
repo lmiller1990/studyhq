@@ -12,7 +12,7 @@ const { guestMode, setShowSignUpModal } = useAuth();
 
 function maybeEmit(event: "newThread" | "newExam") {
   if (guestMode.value) {
-    setShowSignUpModal(true)
+    setShowSignUpModal(true);
   } else {
     if (event === "newExam") {
       emits("newExam");
@@ -25,8 +25,21 @@ function maybeEmit(event: "newThread" | "newExam") {
 
 <template>
   <div class="flex justify-center">
-    <UButton class="mr-2" size="xs" :disabled="disabled" :loading="disabled" @click="maybeEmit('newThread')">
-      New Chat</UButton>
-    <UButton size="xs" :disabled="disabled" :loading="disabled" @click="maybeEmit('newThread')">New Exam</UButton>
+    <UButton
+      class="mr-2"
+      size="xs"
+      :disabled="disabled"
+      :loading="disabled"
+      @click="maybeEmit('newThread')"
+    >
+      New Chat</UButton
+    >
+    <UButton
+      size="xs"
+      :disabled="disabled"
+      :loading="disabled"
+      @click="maybeEmit('newThread')"
+      >New Exam</UButton
+    >
   </div>
 </template>
