@@ -1,6 +1,6 @@
 # StudyHQ
 
-AI powered revision, exam generator and grader. 
+AI powered revision, exam generator and grader.
 
 https://studyhq.app
 
@@ -12,7 +12,6 @@ https://studyhq.app
 - Receive useful feedback
 - Retake exams to practice
 
-
 ## Coming soon
 
 - More customizable exams
@@ -21,7 +20,7 @@ https://studyhq.app
 
 ## TODO
 
-- Figure out how to price this! 
+- Figure out how to price this!
 - Allow bring your own API key
 
 # Screenshots

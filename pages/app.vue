@@ -19,7 +19,7 @@ const { run, loading } = useCreateThread();
       v-if="loggedIn"
       class="flex justify-center"
     >
-      Welcome back, {{ user?.name }}.
+      Welcome back, {{ user?.name ?? "guest" }}.
     </div>
 
     <NewButtons

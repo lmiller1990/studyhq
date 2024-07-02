@@ -8,12 +8,13 @@ import { queryForUser } from "~/src/dynamo";
  */
 export async function getUser(
   event: H3Event<EventHandlerRequest>,
-): Promise<DynamoSchema["User"]> {
+): Promise<DynamoSchema["User"] | "guest"> {
   const session = await getUserSession(event);
 
   // @ts-ignore
   if (!session.user?.email) {
-    throw new UnauthorizedError();
+    return "guest";
+    // throw new UnauthorizedError();
   }
 
   // check db

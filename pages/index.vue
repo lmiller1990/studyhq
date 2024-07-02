@@ -4,9 +4,34 @@ definePageMeta({
 });
 
 const { user, session, loggedIn } = useUserSession();
+const { setGuest } = useAuth();
 
 if (loggedIn.value) {
   await navigateTo("/app");
+}
+
+const examples = [
+  { color: "violet", subject: "Psychology" },
+  { color: "sky", subject: "Python Programming" },
+  { color: "teal", subject: "Biomedical Science" },
+  { color: "fuchsia", subject: "Business" },
+] as const;
+
+const loading = ref(false);
+const clickedSubject = ref("");
+
+async function handleExample(example: (typeof examples)[number]) {
+  loading.value = true;
+  clickedSubject.value = example.subject;
+  setGuest();
+  const res = await $fetch("/api/guest", {
+    method: "POST",
+    body: {
+      subject: example.subject,
+    },
+  });
+  loading.value = false;
+  await navigateTo(`/exams/${res.id}`);
 }
 </script>
 
@@ -26,6 +51,30 @@ if (loggedIn.value) {
             <SignInGoogle />
             <SignInGithub />
           </div>
+          <div class="flex w-full items-center">
+            <hr
+              class="my-12 h-0.5 border-t-0 bg-neutral-100 w-full dark:bg-white/10"
+            />
+            <div class="mx-4 w-full">or take an example quiz</div>
+            <hr
+              class="my-12 h-0.5 border-t-0 bg-neutral-100 w-full dark:bg-white/10"
+            />
+          </div>
+          <p class="mb-8 flex">
+            <UButton
+              v-for="example of examples"
+              :loading="loading && clickedSubject === example.subject"
+              :disabled="loading"
+              class="mx-1"
+              :color="example.color"
+              @click="() => handleExample(example)"
+              >{{
+                loading && clickedSubject === example.subject
+                  ? "Generating new quiz..."
+                  : example.subject
+              }}
+            </UButton>
+          </p>
         </div>
       </div>
     </NuxtLayout>

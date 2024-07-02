@@ -15,7 +15,10 @@ export default defineEventHandler(async (event) => {
   // HACK: https://github.com/nuxt/nuxt/issues/22488
   const id = getRouterParam(event, "id")?.split(":")[1];
   const user = await getUser(event);
-  const exam = await queryForExamById(user.email, id!);
+  const exam = await queryForExamById(
+    user == "guest" ? "guest" : user.email,
+    id!,
+  );
   const questions = exam.questions.split(questionSeparator) as string[];
   const answers = (exam.answers ?? "").split(answerSeparator) as string[];
   return {

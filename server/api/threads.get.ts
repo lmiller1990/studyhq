@@ -5,7 +5,7 @@ import { queryForThreadsByUser } from "~/src/dynamo";
 export default defineEventHandler(async (event) => {
   const user = await getUser(event);
 
-  if (!user) {
+  if (!user || user === "guest") {
     return [];
   }
 

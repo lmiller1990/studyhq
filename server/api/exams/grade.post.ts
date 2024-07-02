@@ -50,7 +50,10 @@ export default defineEventHandler(async (event) => {
     .map(({ question, answer }) => `${question}\n\nAnswer: ${answer}`)
     .join("\n\n");
 
-  const dbexam = await queryForExamById(user.email, id);
+  const dbexam = await queryForExamById(
+    user === "guest" ? "guest" : user.email,
+    id,
+  );
 
   await openai.beta.threads.runs.createAndPoll(dbexam.openai_id, {
     assistant_id: assistants.examGradingBot,
@@ -74,7 +77,7 @@ export default defineEventHandler(async (event) => {
   }
 
   await updateExam({
-    email: user.email,
+    email: user === "guest" ? "guest" : user.email,
     uuid: id,
     feedback: message.content[0].text.value,
     answers: questions

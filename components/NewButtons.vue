@@ -7,6 +7,20 @@ const emits = defineEmits<{
   (e: "newThread"): void;
   (e: "newExam"): void;
 }>();
+
+const { guestMode, setShowSignUpModal } = useAuth();
+
+function maybeEmit(event: "newThread" | "newExam") {
+  if (guestMode.value) {
+    setShowSignUpModal(true);
+  } else {
+    if (event === "newExam") {
+      emits("newExam");
+    } else if (event === "newThread") {
+      emits("newThread");
+    }
+  }
+}
 </script>
 
 <template>
@@ -16,7 +30,7 @@ const emits = defineEmits<{
       size="xs"
       :disabled="disabled"
       :loading="disabled"
-      @click="emits('newThread')"
+      @click="maybeEmit('newThread')"
     >
       New Chat</UButton
     >
@@ -24,7 +38,7 @@ const emits = defineEmits<{
       size="xs"
       :disabled="disabled"
       :loading="disabled"
-      @click="emits('newThread')"
+      @click="maybeEmit('newThread')"
       >New Exam</UButton
     >
   </div>

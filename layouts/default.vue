@@ -2,7 +2,16 @@
 import { emitter } from "~/src/emitter";
 import { useIntervalFn, useMagicKeys } from "@vueuse/core";
 import SidebarLinks from "~/components/SidebarLinks.vue";
+import { useAuth } from "~/composables/useAuth";
+import SignUpModal from "~/components/SignUpModal.vue";
+
 const { ctrl, n } = useMagicKeys();
+const { clear, loggedIn } = useUserSession();
+const { guestMode, setShowSignUpModal, showSignUpModal } = useAuth();
+
+if (!loggedIn.value && !guestMode.value) {
+  await navigateTo("/");
+}
 
 const { data: threads, refresh: refreshThreads } =
   await useFetch("/api/threads");
@@ -15,16 +24,10 @@ declare global {
 
 const isOpen = ref(false);
 
-const { clear, loggedIn } = useUserSession();
-
 const { loading: signingOut, run: handleSignOut } = useLoading(async () => {
   await clear();
   await navigateTo("/");
 });
-
-if (!loggedIn.value) {
-  await navigateTo("/");
-}
 
 const { data: user, refresh: refreshUserData } = await useFetch("/api/user");
 
@@ -69,13 +72,21 @@ const examLinks = computed(() =>
 const { run: _handleNewThread, loading: creatingNewThread } = useCreateThread();
 
 async function handleNewThread() {
-  await _handleNewThread();
-  isOpen.value = false;
+  if (guestMode.value) {
+    setShowSignUpModal(true);
+  } else {
+    await _handleNewThread();
+    isOpen.value = false;
+  }
 }
 
 async function handleNewExam() {
-  isOpen.value = false;
-  await navigateTo(`/exams/new`);
+  if (guestMode.value) {
+    setShowSignUpModal(true);
+  } else {
+    isOpen.value = false;
+    await navigateTo(`/exams/new`);
+  }
 }
 
 watchEffect(() => {
@@ -96,6 +107,7 @@ const credit = computed(() => {
 
 <template>
   <UContainer class="pt-4">
+    <SignUpModal v-model="showSignUpModal" />
     <div class="flex justify-between items-center w-full mb-4 mx-2">
       <NuxtLink
         class="font-mono mr-4"
@@ -122,7 +134,7 @@ const credit = computed(() => {
             @click="() => (isOpen = true)"
           />
           <USlideover v-model="isOpen">
-            <div>
+            <div class="overflow-scroll">
               <div class="flex items-center justify-between mt-4 mx-2">
                 <UButton
                   @click="handleSignOut"
