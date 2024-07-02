@@ -34,5 +34,5 @@ jobs:
         run: |
           echo "${{ secrets.DO_SSH_KEY }}" > /tmp/ssh_key
           chmod 600 /tmp/ssh_key
-          rsync -avz -e "ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no" .output/ root@147.182.211.19:/home/ubuntu/studyhq/.output
+          rsync -avz -e "ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no" .output/ root@147.182.211.19:/root/studyhq/.output
           ssh -i /tmp/ssh_key -o StrictHostKeyChecking=no root@147.182.211.19 'bash -c "source ~/.bashrc && source ~/.nvm/nvm.sh && pm2 restart all"'
