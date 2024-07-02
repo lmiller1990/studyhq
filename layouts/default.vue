@@ -3,10 +3,11 @@ import { emitter } from "~/src/emitter";
 import { useIntervalFn, useMagicKeys } from "@vueuse/core";
 import SidebarLinks from "~/components/SidebarLinks.vue";
 import { useAuth } from "~/composables/useAuth";
+import SignUpModal from "~/components/SignUpModal.vue";
 
 const { ctrl, n } = useMagicKeys();
 const { clear, loggedIn } = useUserSession();
-const { setGuest, guestMode } = useAuth();
+const { guestMode, setShowSignUpModal, showSignUpModal } = useAuth();
 
 if (!loggedIn.value && !guestMode.value) {
   await navigateTo("/");
@@ -45,8 +46,7 @@ const links = computed(() => {
     return {
       label:
         thread.summary ??
-        `${new Date(thread.created_at * 1000).toTimeString()} - id ${
-          thread.id
+        `${new Date(thread.created_at * 1000).toTimeString()} - id ${thread.id
         }`,
       icon: "i-heroicons-document-solid",
       to: `/threads/${thread.id}`,
@@ -71,13 +71,21 @@ const examLinks = computed(() =>
 const { run: _handleNewThread, loading: creatingNewThread } = useCreateThread();
 
 async function handleNewThread() {
-  await _handleNewThread();
-  isOpen.value = false;
+  if (guestMode.value) {
+    setShowSignUpModal(true)
+  } else {
+    await _handleNewThread();
+    isOpen.value = false;
+  }
 }
 
 async function handleNewExam() {
-  isOpen.value = false;
-  await navigateTo(`/exams/new`);
+  if (guestMode.value) {
+    setShowSignUpModal(true)
+  } else {
+    isOpen.value = false;
+    await navigateTo(`/exams/new`);
+  }
 }
 
 watchEffect(() => {
@@ -98,11 +106,9 @@ const credit = computed(() => {
 
 <template>
   <UContainer class="pt-4">
+    <SignUpModal v-model="showSignUpModal" />
     <div class="flex justify-between items-center w-full mb-4 mx-2">
-      <NuxtLink
-        class="font-mono mr-4"
-        to="/"
-      >
+      <NuxtLink class="font-mono mr-4" to="/">
         StudyHQ
       </NuxtLink>
       <div class="flex items-center">
@@ -118,49 +124,24 @@ const credit = computed(() => {
         </div>
 
         <div class="md:hidden">
-          <UButton
-            color="white"
-            trailing-icon="i-heroicons-bars-3"
-            @click="() => (isOpen = true)"
-          />
+          <UButton color="white" trailing-icon="i-heroicons-bars-3" @click="() => (isOpen = true)" />
           <USlideover v-model="isOpen">
-            <div>
+            <div class="overflow-scroll">
               <div class="flex items-center justify-between mt-4 mx-2">
-                <UButton
-                  @click="handleSignOut"
-                  variant="link"
-                  size="xs"
-                  :disabled="signingOut"
-                  >Sign out</UButton
-                >
-                <UButton
-                  color="gray"
-                  variant="ghost"
-                  size="sm"
-                  icon="i-heroicons-x-mark-20-solid"
-                  square
-                  padded
-                  @click="isOpen = false"
-                />
+                <UButton @click="handleSignOut" variant="link" size="xs" :disabled="signingOut">Sign out</UButton>
+                <UButton color="gray" variant="ghost" size="sm" icon="i-heroicons-x-mark-20-solid" square padded
+                  @click="isOpen = false" />
               </div>
 
-              <UCard
-                class="flex flex-col flex-1"
-                :ui="{
-                  body: { base: 'flex-1' },
-                  ring: '',
-                  divide: 'divide-y divide-gray-100 dark:divide-gray-800',
-                }"
-              >
+              <UCard class="flex flex-col flex-1" :ui="{
+                body: { base: 'flex-1' },
+                ring: '',
+                divide: 'divide-y divide-gray-100 dark:divide-gray-800',
+              }">
                 <template #header>
                   <div class="flex justify-between items-center">
                     <h2>Chats</h2>
-                    <UButton
-                      size="xs"
-                      @click="handleNewThread"
-                      :disabled="creatingNewThread"
-                      >New Chat</UButton
-                    >
+                    <UButton size="xs" @click="handleNewThread" :disabled="creatingNewThread">New Chat</UButton>
                   </div>
                 </template>
                 <div>
@@ -168,23 +149,15 @@ const credit = computed(() => {
                 </div>
               </UCard>
 
-              <UCard
-                class="flex flex-col flex-1"
-                :ui="{
-                  body: { base: 'flex-1' },
-                  ring: '',
-                  divide: 'divide-y divide-gray-100 dark:divide-gray-800',
-                }"
-              >
+              <UCard class="flex flex-col flex-1" :ui="{
+                body: { base: 'flex-1' },
+                ring: '',
+                divide: 'divide-y divide-gray-100 dark:divide-gray-800',
+              }">
                 <template #header>
                   <div class="flex justify-between items-center">
                     <h2>Exams</h2>
-                    <UButton
-                      size="xs"
-                      @click="handleNewExam"
-                      :disabled="creatingNewThread"
-                      >New Exam</UButton
-                    >
+                    <UButton size="xs" @click="handleNewExam" :disabled="creatingNewThread">New Exam</UButton>
                   </div>
                 </template>
                 <div>
@@ -198,14 +171,8 @@ const credit = computed(() => {
     </div>
 
     <div class="flex h-full">
-      <SidebarLinks
-        class="hidden md:block"
-        :chat-links="links"
-        :exam-links="examLinks"
-        :disabled="creatingNewThread"
-        @new-exam="handleNewExam"
-        @new-thread="handleNewThread"
-      />
+      <SidebarLinks class="hidden md:block" :chat-links="links" :exam-links="examLinks" :disabled="creatingNewThread"
+        @new-exam="handleNewExam" @new-thread="handleNewThread" />
 
       <div class="w-full h-full mb-4">
         <UContainer>
