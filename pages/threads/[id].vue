@@ -2,10 +2,20 @@
 import type { SerializeObject } from "nitropack";
 import markdownit from "markdown-it";
 import type { Message } from "openai/resources/beta/threads/messages";
+import Shiki from "@shikijs/markdown-it";
 import { emitter } from "~/src/emitter";
 
 const route = useRoute();
 const md = markdownit();
+
+md.use(
+  await Shiki({
+    themes: {
+      light: "github-dark",
+      dark: "github-dark",
+    },
+  }),
+);
 
 const id = route.params.id;
 
@@ -196,7 +206,8 @@ function handleKeydown(event: KeyboardEvent) {
 
 <style>
 .msg > p:not(:first-of-type) {
-  padding-top: 10px; /* Adjust the value as needed */
+  padding-top: 10px;
+  /* Adjust the value as needed */
 }
 
 .msg > h1,
@@ -205,7 +216,8 @@ h3,
 h4,
 h5,
 h6 {
-  padding-top: 10px; /* Adjust the value as needed */
+  padding-top: 10px;
+  /* Adjust the value as needed */
 }
 
 .msg > ul {
@@ -217,14 +229,6 @@ h6 {
 .msg > ol {
   list-style: initial;
   margin-left: 20px;
-}
-
-pre {
-  white-space: pre-wrap;
-}
-
-pre {
-  @apply dark:bg-gray-700;
 }
 
 .msg > pre {

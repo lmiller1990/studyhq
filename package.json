@@ -20,6 +20,7 @@
     "@nuxt/ui-pro": "^1.2.0",
     "@nuxtjs/google-fonts": "^3.2.0",
     "@pinia/nuxt": "^0.5.1",
+    "@shikijs/markdown-it": "^1.10.1",
     "@types/events": "^3.0.3",
     "@types/markdown-it": "^14.1.1",
     "@vueuse/core": "^10.10.0",
