@@ -7,6 +7,8 @@ module.exports = {
       instances: "max",
       script: "npm",
       args: "run start",
+      error_file: "/dev/null",
+      out_file: "/dev/null",
     },
   ],
 };
