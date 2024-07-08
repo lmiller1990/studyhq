@@ -162,31 +162,56 @@ function handleKeydown(event: KeyboardEvent) {
 
 <template>
   <ul>
-    <li v-for="message of allMessages" class="flex w-full my-4" :class="{ 'justify-end': message.role === 'user' }">
-      <div v-if="message.content[0]?.type === 'text'" class="p-1 rounded px-2" :class="{
-        'bg-gray-200 dark:bg-gray-700': message.role === 'user',
-        'dark:bg-gray-800': message.role !== 'user',
-        'max-w-[50vw]': message.role === 'user',
-      }">
-        <span class="msg" v-html="toHtml(message.content[0].text.value)" />
+    <li
+      v-for="message of allMessages"
+      class="flex w-full my-4"
+      :class="{ 'justify-end': message.role === 'user' }"
+    >
+      <div
+        v-if="message.content[0]?.type === 'text'"
+        class="p-1 rounded px-2"
+        :class="{
+          'bg-gray-200 dark:bg-gray-700': message.role === 'user',
+          'dark:bg-gray-800': message.role !== 'user',
+          'max-w-[50vw]': message.role === 'user',
+        }"
+      >
+        <span
+          class="msg"
+          v-html="toHtml(message.content[0].text.value)"
+        />
       </div>
     </li>
   </ul>
 
-  <form @submit.prevent="handleSubmitMessage" class="flex flex-col items-end">
-    <UTextarea v-model="msg" autoresize placeholder="Chat..." :maxrows="20" @keydown="handleKeydown" class="w-full mb-2"
-      ref="textAreaRef" />
-    <UButton type="submit" :disabled="submitting || !msg.length">Send</UButton>
+  <form
+    @submit.prevent="handleSubmitMessage"
+    class="flex flex-col items-end"
+  >
+    <UTextarea
+      v-model="msg"
+      autoresize
+      placeholder="Chat..."
+      :maxrows="20"
+      @keydown="handleKeydown"
+      class="w-full mb-2"
+      ref="textAreaRef"
+    />
+    <UButton
+      type="submit"
+      :disabled="submitting || !msg.length"
+      >Send</UButton
+    >
   </form>
 </template>
 
 <style>
-.msg>p:not(:first-of-type) {
+.msg > p:not(:first-of-type) {
   padding-top: 10px;
   /* Adjust the value as needed */
 }
 
-.msg>h1,
+.msg > h1,
 h2,
 h3,
 h4,
@@ -196,19 +221,20 @@ h6 {
   /* Adjust the value as needed */
 }
 
-.msg>ul {
+.msg > ul {
   list-style: disc;
-  list-style-position: inside;
+  list-style-position: inherit;
   margin-left: 20px;
 }
 
-.msg>ol {
-  list-style: initial;
+.msg > ol {
+  list-style: disc;
+  list-style-position: inherit;
   margin-left: 20px;
 }
 
-.msg>pre {
-  @apply border-gray-100 border p-2 mt-2 rounded;
+.shiki {
+  @apply border-gray-100 border p-2 mt-2 rounded overflow-scroll whitespace-pre-wrap;
 }
 
 li {
