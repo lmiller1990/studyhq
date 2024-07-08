@@ -110,6 +110,7 @@ const credit = computed(() => {
     <SignUpModal v-model="showSignUpModal" />
     <div class="flex justify-between items-center w-full mb-4 mx-2">
       <NuxtLink
+        title="LATEST_HASH"
         class="font-mono mr-4"
         to="/"
       >

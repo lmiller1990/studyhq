@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "patch-package && nuxt build && aws s3 cp .output/public/_nuxt/ s3://lachlannuxttest/_nuxt --recursive",
+    "build": "./build.sh",
     "dev": "AWS_PROFILE=studyhq nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
