@@ -24,12 +24,34 @@ const { data, refresh } = await useFetch(`/api/threads/${route.params.id}`);
 
 const msg = ref("");
 const textAreaRef = ref<{ textarea: HTMLTextAreaElement }>();
+const attachmentModel = ref("");
 
 onMounted(() => {
   textAreaRef.value?.textarea.focus();
 });
 
 const localMessages = ref<SerializeObject<Message>[]>([]);
+const attachments = ref<string[]>([]);
+const uploadingAttachments = ref(false);
+
+async function handleUpload(e: Event) {
+  uploadingAttachments.value = true;
+  const files = (e.target as any).files as File[];
+  const form = new FormData();
+  let i = 0;
+  for (const file of files) {
+    form.append(i.toString(), file);
+    i++;
+  }
+
+  const { fileIds } = await $fetch("/api/attachments", {
+    method: "POST",
+    body: form,
+  });
+
+  attachments.value = fileIds;
+  uploadingAttachments.value = false;
+}
 
 const allMessages = computed(() => {
   return [
@@ -91,6 +113,7 @@ async function handleSubmitMessage() {
     body: JSON.stringify({
       threadId: id,
       message: cachedMsg,
+      files: attachments.value,
     }),
   });
   const reader = response?.body?.getReader()!;
@@ -117,6 +140,7 @@ async function handleSubmitMessage() {
       controller.close();
       reader.releaseLock();
       msg.value = "";
+      attachmentModel.value = "";
     },
   });
 }
@@ -197,11 +221,22 @@ function handleKeydown(event: KeyboardEvent) {
       class="w-full mb-2"
       ref="textAreaRef"
     />
-    <UButton
-      type="submit"
-      :disabled="submitting || !msg.length"
-      >Send</UButton
-    >
+    <div class="flex">
+      <UInput
+        type="file"
+        :disabled="submitting"
+        class="mr-2"
+        multiple
+        v-model="attachmentModel"
+        accept="image/png, image/jpeg, image/jpg"
+        @input="handleUpload"
+      />
+      <UButton
+        type="submit"
+        :disabled="submitting || !msg.length || uploadingAttachments"
+        >Send</UButton
+      >
+    </div>
   </form>
 </template>
 

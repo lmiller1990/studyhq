@@ -3,6 +3,7 @@ import { assistants } from "~/server/shared";
 import { getUser } from "~/server/token";
 import { queryForThreadById } from "~/src/dynamo";
 import { Writable } from "stream";
+import { ImageFileContentBlock } from "openai/resources/beta/threads/messages.mjs";
 
 interface StreamCallbackOptions {
   send: (chunk: string) => void;
@@ -39,7 +40,11 @@ export default defineEventHandler(async (event) => {
   const user = await getUser(event);
   // await tryDeductFreeMessage(user);
 
-  const body = await readBody<{ threadId: string; message: string }>(event);
+  const body = await readBody<{
+    threadId: string;
+    message: string;
+    files: string[];
+  }>(event);
   const thread = await queryForThreadById(user.email, body.threadId);
 
   if (!thread) {
@@ -48,9 +53,24 @@ export default defineEventHandler(async (event) => {
 
   console.log(`Creating message: ${body.message} in thread: ${body.threadId}`);
 
+  const files = body.files.map<ImageFileContentBlock>((file_id) => {
+    return {
+      type: "image_file",
+      image_file: {
+        file_id,
+      },
+    };
+  });
+
   await openai.beta.threads.messages.create(thread.openai_id, {
     role: "user",
-    content: body.message,
+    content: [
+      ...files,
+      {
+        type: "text",
+        text: body.message,
+      },
+    ],
   });
 
   const res = event.node.res;
