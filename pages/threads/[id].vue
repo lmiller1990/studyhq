@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import type { SerializeObject } from "nitropack";
 import markdownit from "markdown-it";
+import markdownItLatex from "markdown-it-latex";
 import type { Message } from "openai/resources/beta/threads/messages";
 import Shiki from "@shikijs/markdown-it";
 import { emitter } from "~/src/emitter";
+import "markdown-it-latex/dist/index.css";
 
 const route = useRoute();
 const md = markdownit();
@@ -17,6 +19,7 @@ md.use(
     },
   }),
 );
+md.use(markdownItLatex);
 
 const id = route.params.id;
 
