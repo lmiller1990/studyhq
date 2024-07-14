@@ -34,7 +34,7 @@ await tryApplyPlugin(
     }),
 );
 
-tryApplyPlugin("latex", markdownItLatex);
+tryApplyPlugin("latex", () => markdownItLatex);
 
 const msg = ref("");
 const textAreaRef = ref<{ textarea: HTMLTextAreaElement }>();
