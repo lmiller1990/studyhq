@@ -11,36 +11,45 @@ const route = useRoute();
 const id = route.params.id;
 
 const { data, refresh } = await useFetch(`/api/threads/${route.params.id}`);
-const md = markdownit();
 
-async function tryApplyPlugin(name: string, p: () => any) {
-  try {
-    console.log(`Applying plugin ${name}`);
-    md.use(await p());
-  } catch (e) {
-    console.error(`Error creating markdown renderer for plugin ${name}`, e);
+async function createMarkdownRenderer() {
+  const md = markdownit();
+
+  async function tryApplyPlugin(name: string, p: () => any) {
+    try {
+      console.log(`Applying plugin ${name}`);
+      md.use(await p());
+    } catch (e) {
+      console.error(`Error creating markdown renderer for plugin ${name}`, e);
+    }
   }
-}
 
-tryApplyPlugin("latex", () => markdownItLatex);
-await tryApplyPlugin(
-  "shiki",
-  async () =>
-    await Shiki({
-      fallbackLanguage: "sh",
-      themes: {
-        light: "github-dark",
-        dark: "github-dark",
-      },
-    }),
-);
+  tryApplyPlugin("latex", () => markdownItLatex);
+
+  await tryApplyPlugin(
+    "shiki",
+    async () =>
+      await Shiki({
+        fallbackLanguage: "sh",
+        themes: {
+          light: "github-dark",
+          dark: "github-dark",
+        },
+      }),
+  );
+
+  return md;
+}
 
 const msg = ref("");
 const textAreaRef = ref<{ textarea: HTMLTextAreaElement }>();
 const attachmentModel = ref("");
 
-onMounted(() => {
+let md = shallowRef<markdownit>();
+
+onMounted(async () => {
   textAreaRef.value?.textarea.focus();
+  md.value = await createMarkdownRenderer();
 });
 
 const localMessages = ref<SerializeObject<Message>[]>([]);
@@ -160,7 +169,10 @@ async function handleSubmitMessage() {
 }
 
 function toHtml(msg: string) {
-  return md.render(msg);
+  if (!md.value) {
+    throw new Error("Markdownit should be defined!");
+  }
+  return md.value.render(msg);
 }
 
 function createTempMsg(msgText: string, role: "system" | "user"): any {
@@ -199,59 +211,72 @@ function handleKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <ul>
-    <li
-      v-for="message of allMessages"
-      class="flex w-full my-4"
-      :class="{ 'justify-end': message.role === 'user' }"
-    >
-      <div
-        v-if="message.content[0]?.type === 'text'"
-        class="p-1 rounded px-2"
-        :class="{
-          'bg-gray-200 dark:bg-gray-700': message.role === 'user',
-          'dark:bg-gray-800': message.role !== 'user',
-          'max-w-[50vw]': message.role === 'user',
-        }"
+  <div>
+    <div v-if="md">
+      <ul>
+        <li
+          v-for="message of allMessages"
+          class="flex w-full my-4"
+          :class="{ 'justify-end': message.role === 'user' }"
+        >
+          <div
+            v-if="message.content[0]?.type === 'text'"
+            class="p-1 rounded px-2"
+            :class="{
+              'bg-gray-200 dark:bg-gray-700': message.role === 'user',
+              'dark:bg-gray-800': message.role !== 'user',
+              'max-w-[50vw]': message.role === 'user',
+            }"
+          >
+            <span
+              class="msg"
+              v-html="toHtml(message.content[0].text.value)"
+            />
+          </div>
+        </li>
+      </ul>
+
+      <form
+        @submit.prevent="handleSubmitMessage"
+        class="flex flex-col items-end"
       >
-        <span
-          class="msg"
-          v-html="toHtml(message.content[0].text.value)"
+        <UTextarea
+          v-model="msg"
+          autoresize
+          placeholder="Chat..."
+          :maxrows="20"
+          @keydown="handleKeydown"
+          class="w-full mb-2"
+          ref="textAreaRef"
+        />
+        <div class="flex">
+          <UInput
+            type="file"
+            :disabled="submitting"
+            class="mr-2"
+            multiple
+            v-model="attachmentModel"
+            accept="image/png, image/jpeg, image/jpg"
+            @input="handleUpload"
+          />
+          <UButton
+            type="submit"
+            :disabled="submitting || !msg.length || uploadingAttachments"
+            >Send</UButton
+          >
+        </div>
+      </form>
+    </div>
+    <div v-else>
+      <div class="flex items-center justify-center mt-32 flex-row-reverse">
+        <div>Loading...</div>
+        <UIcon
+          name="i-heroicons-arrow-path"
+          class="animate-spin mr-2"
         />
       </div>
-    </li>
-  </ul>
-
-  <form
-    @submit.prevent="handleSubmitMessage"
-    class="flex flex-col items-end"
-  >
-    <UTextarea
-      v-model="msg"
-      autoresize
-      placeholder="Chat..."
-      :maxrows="20"
-      @keydown="handleKeydown"
-      class="w-full mb-2"
-      ref="textAreaRef"
-    />
-    <div class="flex">
-      <UInput
-        type="file"
-        :disabled="submitting"
-        class="mr-2"
-        multiple
-        v-model="attachmentModel"
-        accept="image/png, image/jpeg, image/jpg"
-        @input="handleUpload"
-      />
-      <UButton
-        type="submit"
-        :disabled="submitting || !msg.length || uploadingAttachments"
-        >Send</UButton
-      >
     </div>
-  </form>
+  </div>
 </template>
 
 <style>
