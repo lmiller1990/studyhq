@@ -22,6 +22,7 @@ async function tryApplyPlugin(name: string, p: () => any) {
   }
 }
 
+tryApplyPlugin("latex", () => markdownItLatex);
 await tryApplyPlugin(
   "shiki",
   async () =>
@@ -33,8 +34,6 @@ await tryApplyPlugin(
       },
     }),
 );
-
-tryApplyPlugin("latex", () => markdownItLatex);
 
 const msg = ref("");
 const textAreaRef = ref<{ textarea: HTMLTextAreaElement }>();
