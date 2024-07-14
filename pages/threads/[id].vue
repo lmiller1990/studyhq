@@ -2,14 +2,31 @@
 import type { SerializeObject } from "nitropack";
 import type { Message } from "openai/resources/beta/threads/messages";
 import { emitter } from "~/src/emitter";
+import markdownit from "markdown-it";
+import * as markdownItLatex from "markdown-it-latex";
+import Shiki from "@shikijs/markdown-it";
 import "markdown-it-latex/dist/index.css";
-import { createMarkdownIt } from "~/src/markdown";
 
 const route = useRoute();
 const id = route.params.id;
 
 const { data, refresh } = await useFetch(`/api/threads/${route.params.id}`);
-const md = await createMarkdownIt();
+const md = markdownit();
+
+try {
+  md.use(markdownItLatex.default);
+  md.use(
+    await Shiki({
+      fallbackLanguage: "sh",
+      themes: {
+        light: "github-dark",
+        dark: "github-dark",
+      },
+    }),
+  );
+} catch (e) {
+  console.error("Error creating markdown renderer!", e);
+}
 
 const msg = ref("");
 const textAreaRef = ref<{ textarea: HTMLTextAreaElement }>();
