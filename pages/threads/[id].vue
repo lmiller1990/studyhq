@@ -1,29 +1,15 @@
 <script setup lang="ts">
 import type { SerializeObject } from "nitropack";
-import markdownit from "markdown-it";
-import markdownItLatex from "markdown-it-latex";
 import type { Message } from "openai/resources/beta/threads/messages";
-import Shiki from "@shikijs/markdown-it";
 import { emitter } from "~/src/emitter";
 import "markdown-it-latex/dist/index.css";
+import { createMarkdownIt } from "~/src/markdown";
 
 const route = useRoute();
-const md = markdownit();
-
-md.use(
-  await Shiki({
-    fallbackLanguage: "sh",
-    themes: {
-      light: "github-dark",
-      dark: "github-dark",
-    },
-  }),
-);
-md.use(markdownItLatex);
-
 const id = route.params.id;
 
 const { data, refresh } = await useFetch(`/api/threads/${route.params.id}`);
+const md = await createMarkdownIt();
 
 const msg = ref("");
 const textAreaRef = ref<{ textarea: HTMLTextAreaElement }>();
@@ -57,6 +43,7 @@ async function handleUpload(e: Event) {
 }
 
 const allMessages = computed(() => {
+  // const msg = "```math\n\frac{1}{2} \\pi r^2\n```";
   return [
     createTempMsg(
       "Hi 👋 I am here to help you learn about whatever you want. Over to you!",
