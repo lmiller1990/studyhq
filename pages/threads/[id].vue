@@ -172,6 +172,9 @@ function toHtml(msg: string) {
   if (!md.value) {
     throw new Error("Markdownit should be defined!");
   }
+  const regex = /\$[^$]*\$/g;
+  msg = msg.replace(regex, (match) => `\`${match}\``);
+
   return md.value.render(msg);
 }
 
