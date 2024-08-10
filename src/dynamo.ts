@@ -122,6 +122,31 @@ export async function queryForThreadById(email: string, uuid: string) {
   };
 }
 
+export async function queryForSharedThreadById(uuid: string) {
+  const results = await dynamo.send(
+    new QueryCommand({
+      TableName: "studyhq",
+      KeyConditionExpression: "pk = :pk",
+      ExpressionAttributeValues: {
+        ":pk": { S: `shared#${uuid}` },
+      },
+    }),
+  );
+
+  const t = results?.Items?.[0];
+
+  if (!t) {
+    throw new Error(`Did not find thread with uuid ${uuid}`);
+  }
+
+  return {
+    openai_id: t.openai_id.S!,
+    pk: t.pk.S!,
+    content: t.content?.S ?? "",
+    summary: t.summary?.S ?? "",
+  };
+}
+
 export async function queryForExamsByUser(email: string) {
   const results = await dynamo.send(
     new QueryCommand({
@@ -181,6 +206,27 @@ export async function insertThread(
         sk,
         created_at: Date.now(),
         openai_id,
+      }),
+    }),
+  );
+}
+
+export async function insertPublicThread(
+  pk: string,
+  openai_id: string,
+  content: string,
+  summary: string,
+) {
+  return await dynamo.send(
+    new PutItemCommand({
+      TableName: "studyhq",
+      Item: marshall({
+        pk: `shared#${pk}`,
+        sk: `shared#${pk}`,
+        created_at: Date.now(),
+        openai_id,
+        summary,
+        content,
       }),
     }),
   );

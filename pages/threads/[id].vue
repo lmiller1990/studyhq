@@ -6,7 +6,7 @@ import markdownit from "markdown-it";
 import markdownItLatex from "markdown-it-latex";
 import Shiki from "@shikijs/markdown-it";
 import "markdown-it-latex/dist/index.css";
-import { useEventListener } from "@vueuse/core";
+import { useClipboard, useEventListener } from "@vueuse/core";
 
 const route = useRoute();
 const id = route.params.id;
@@ -220,10 +220,38 @@ function handleKeydown(event: KeyboardEvent) {
     // nextTick(handleSubmitMessage);
   }
 }
+
+const shareLinkText = ref("Share");
+
+const clipboard = useClipboard();
+
+function toggleShareLinkText() {
+  shareLinkText.value = "🔥 Linked copied to clipboard!";
+  window.setTimeout(() => {
+    shareLinkText.value = "Share";
+  }, 2000);
+}
+
+const { run: handleShare, loading: loadingShare } = useLoading(async () => {
+  await window.$fetch(`/api/threads/${route.params.id}/share`, {
+    method: "POST",
+  });
+  await clipboard.copy(document.location.href.replace("threads", "shared"));
+  toggleShareLinkText();
+});
 </script>
 
 <template>
   <div>
+    <div class="flex justify-end">
+      <UButton
+        :loading="loadingShare"
+        :disabled="loadingShare"
+        size="xs"
+        @click="handleShare"
+        >{{ shareLinkText }}</UButton
+      >
+    </div>
     <div v-if="md">
       <ul>
         <li

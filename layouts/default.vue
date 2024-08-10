@@ -117,13 +117,6 @@ const credit = computed(() => {
         StudyHQ
       </NuxtLink>
       <div class="flex items-center">
-        <!-- <span
-          v-if="credit"
-          class="mr-4"
-        >
-          {{ credit }}
-        </span> -->
-
         <div class="hidden md:block">
           <SettingsMenu />
         </div>
