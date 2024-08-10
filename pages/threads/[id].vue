@@ -6,6 +6,7 @@ import markdownit from "markdown-it";
 import markdownItLatex from "markdown-it-latex";
 import Shiki from "@shikijs/markdown-it";
 import "markdown-it-latex/dist/index.css";
+import { useEventListener } from "@vueuse/core";
 
 const route = useRoute();
 const id = route.params.id;
@@ -172,8 +173,9 @@ function toHtml(msg: string) {
   if (!md.value) {
     throw new Error("Markdownit should be defined!");
   }
-  const regex = /\$[^$]*\$/g;
-  msg = msg.replace(regex, (match) => `\`${match}\``);
+
+  // const regex = /\$[^$]*\$/g;
+  // msg = msg.replace(regex, (match) => `\`${match}\``);
 
   return md.value.render(msg);
 }
@@ -206,9 +208,16 @@ function createTempMsg(msgText: string, role: "system" | "user"): any {
   };
 }
 
+useEventListener("keydown", (event) => {
+  if (event.key === "Enter" && event.metaKey) {
+    handleSubmitMessage();
+  }
+});
+
 function handleKeydown(event: KeyboardEvent) {
+  // console.log(event.metaKey);
   if (event.key === "Enter" && !event.shiftKey) {
-    nextTick(handleSubmitMessage);
+    // nextTick(handleSubmitMessage);
   }
 }
 </script>
@@ -245,10 +254,10 @@ function handleKeydown(event: KeyboardEvent) {
       >
         <UTextarea
           v-model="msg"
+          @input="handleKeydown"
           autoresize
           placeholder="Chat..."
           :maxrows="20"
-          @keydown="handleKeydown"
           class="w-full mb-2"
           ref="textAreaRef"
         />
