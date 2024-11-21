@@ -36,7 +36,7 @@ function maybeEmit(event: "newThread" | "newExam") {
 <template>
   <div class="w-72">
     <div class="flex justify-between items-center">
-      <h4 class="font-bold m-2">Chats</h4>
+      <h4 class="font-bold m-2">Recent Chats</h4>
       <UButton
         size="xs"
         :disabled="disabled"

@@ -4,6 +4,8 @@ import { queryForThreadsByUser } from "~/src/dynamo";
 
 export default defineEventHandler(async (event) => {
   const user = await getUser(event);
+  const query = getQuery<{ count?: string }>(event);
+  const count = query.count ? parseInt(query.count, 10) : 100;
 
   if (!user || user === "guest") {
     return [];
@@ -26,5 +28,5 @@ export default defineEventHandler(async (event) => {
 
   all.sort((x, y) => (x.created_at < y.created_at ? 1 : -1));
 
-  return all;
+  return all.slice(0, count);
 });

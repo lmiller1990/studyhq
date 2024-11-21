@@ -13,8 +13,9 @@ if (!loggedIn.value && !guestMode.value) {
   await navigateTo("/");
 }
 
-const { data: threads, refresh: refreshThreads } =
-  await useFetch("/api/threads");
+const { data: threads, refresh: refreshThreads } = await useFetch(
+  "/api/threads?count=10",
+);
 
 declare global {
   interface Window {
